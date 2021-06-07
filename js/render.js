@@ -1,44 +1,47 @@
 const c = document.getElementById("canv");
-const ctx = c.getContext("2d");
 
 var p = new Player(10, 10, 10);
 const dpi = window.devicePixelRatio;
 
-function fixDpi() {
-  let style = {
-    height() {
-      return +getComputedStyle(c).getPropertyValue("height").slice(0, -2);
-    },
-    width() {
-      return +getComputedStyle(c).getPropertyValue("width").slice(0, -2);
-    },
-  };
-  console.log(style.width(), style.height());
-  c.setAttribute("width", style.width() * dpi);
-  c.setAttribute("height", style.height() * dpi);
+function prepCanvas(canvas) {
+  let winHeight = window.innerHeight;
+  let winWidth = window.innerWidth;
+
+  canvas.width = winWidth;
+  canvas.height = winHeight;
+  console.log(canvas.width)
+  console.log(canvas.height)
+  
+  var dpr = window.devicePixelRatio || 1;
+  var rect = canvas.getBoundingClientRect();
+  
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  
+  var ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  return ctx;
 }
+
+const ctx = prepCanvas(c);
+// const ctx = c.getContext("2d");
 
 var arenaWitdh = 412;
 var arenaHeigth = 144;
 
-fixDpi();
+var combatZoneTexture = new Image();
+combatZoneTexture.src = "../textures/HPBackground.png"
+
 function render() {
+  // fixDpi();
   clearFrame();
-  ctx.beginPath();
-  ctx.strokeStyle = "white";
-  ctx.lineWidth = "5";
-  ctx.rect(
-    c.width / 2 - arenaWitdh / 2,
-    c.height / 2 - arenaHeigth / 2,
-    arenaWitdh,
-    arenaHeigth
-  );
-  ctx.stroke();
-
-  if (arenaWitdh < 512) {
+  
     // arenaWitdh -= 1;
-  }
-
+  combatZoneFill = ctx.createPattern(combatZoneTexture, "repeat");
+  // console.log(combatZoneFill)
+  ctx.strokeStyle = combatZoneFill;
+  ctx.lineWidth = "8";
+  ctx.strokeRect(20, 20, c.width - 40, 200);
   requestAnimationFrame(render);
 }
 
