@@ -5,24 +5,30 @@ class Player {
     this.texture = new Image();
     this.texture.src = "../textures/PlayerHeart.png";
 
+    this.color = color;
+
     this.boundingBoxWidth = 14;
     this.boundingBoxHeight = 14;
 
+    this.speed = 2;
+    this.velX = 0;
+    this.velY = 0;
     // 0 free move - blue
     // 1 grav-based move - red
     this.playerMode = 0;
     this.playerColor = color;
   }
 
-  move(horVector, verVector) {
-    this.x += horVector;
-    this.y += verVector;
+  move(dirVector) {
+    this.velX = dirVector.RIGHT * this.speed + -dirVector.LEFT * this.speed;
+    this.velY = dirVector.DOWN * this.speed + -dirVector.UP * this.speed;
   }
-
-  changeColor(color) {}
 
   render(ctx) {
     ctx.save();
+
+    this.x += this.velX;
+    this.y += this.velY;
 
     ctx.translate(
       this.x + this.boundingBoxWidth / 2,
@@ -44,7 +50,7 @@ class Player {
 
     ctx.globalCompositeOperation = "source-in";
 
-    ctx.fillStyle = red;
+    ctx.fillStyle = this.color;
     ctx.fillRect(0, 0, c.width, c.height);
     ctx.globalCompositeOperation = "source-over";
     // ctx.rotate(-(Math.PI / 2));
