@@ -27,15 +27,23 @@ function onKeyUp(e) {
   switch (k) {
     case 37:
       dirVector.LEFT = 0;
+      p.move(dirVector);
       break;
     case 39:
       dirVector.RIGHT = 0;
+      p.move(dirVector);
       break;
     case 38:
       dirVector.UP = 0;
+      p.move(dirVector);
+      if (p.isJumping) {
+        p.isJumping = false;
+        p.velY = 0;
+      }
       break;
     case 40:
       dirVector.DOWN = 0;
+      p.move(dirVector);
       break;
     default:
   }
@@ -46,15 +54,23 @@ function onKeyDown(e) {
   switch (k) {
     case 37:
       dirVector.LEFT = 1;
+      p.move(dirVector);
       break;
     case 39:
       dirVector.RIGHT = 1;
+      p.move(dirVector);
       break;
     case 38:
-      dirVector.UP = 1;
+      if (p.mode == 0) {
+        dirVector.UP = 1;
+        p.move(dirVector);
+      } else {
+        p.jump();
+      }
       break;
     case 40:
       dirVector.DOWN = 1;
+      p.move(dirVector);
       break;
     default:
   }
@@ -76,34 +92,15 @@ p.y = parseInt(c.style.height, 10) * (4 / 6);
 
 const arena = new Arena(arenaWitdh, arenaHeigth);
 
-function checkCombatBoundary(p, dirVector) {
-  if (p.x + p.boundingBoxWidth >= arena.x + arena.width - arena.borderWidth) {
-    dirVector.RIGHT = 0;
-  }
-  if (p.x <= arena.x + arena.borderWidth) {
-    dirVector.LEFT = 0;
-  }
-  if (p.y + p.boundingBoxHeight >= arena.y + arena.height - arena.borderWidth) {
-    dirVector.DOWN = 0;
-  }
-  if (p.y <= arena.y + arena.borderWidth) {
-    dirVector.UP = 0;
-  }
-}
-
 function gameLoop() {
   clearFrame();
-
-  checkCombatBoundary(p, dirVector);
-  p.move(dirVector);
-
   render();
 
   requestAnimationFrame(gameLoop);
 }
 
 function render() {
-  p.render(ctx);
+  p.render(ctx, arena);
   arena.render(ctx);
 }
 

@@ -14,8 +14,9 @@ class Arena {
     this.xResizeValue = this.resizeSpeed;
     this.yResizeValue = this.resizeSpeed;
 
-    this.x = 0;
-    this.y = 0;
+    this.x = parseInt(ctx.canvas.style.width, 10) / 2 - this.currentWidth / 2;
+    this.y =
+      parseInt(ctx.canvas.style.height, 10) * (4 / 5) - this.currentHeight;
   }
 
   resize(width, height) {
