@@ -8,8 +8,7 @@ class Arena {
     this.currentHeight = this.height;
 
     this.borderWidth = 4;
-    this.texture = new Image();
-    this.texture.src = "../textures/CombatZoneUnclipper.png";
+    this.texture = document.getElementById("combat-border");
 
     this.xResizeValue = this.resizeSpeed;
     this.yResizeValue = this.resizeSpeed;

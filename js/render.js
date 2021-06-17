@@ -1,3 +1,5 @@
+window.onload = main;
+
 const red = "#c70021";
 const blue = "#2000bf";
 
@@ -91,6 +93,9 @@ p.x = parseInt(c.style.width, 10) / 2 - p.boundingBoxWidth / 2;
 p.y = parseInt(c.style.height, 10) * (4 / 6);
 
 const arena = new Arena(arenaWitdh, arenaHeigth);
+const sans = new Sans(0, 0);
+sans.x = parseInt(c.style.width, 10) / 2 - sans.width / 2;
+sans.y = arena.y - sans.height - 12;
 
 function gameLoop() {
   clearFrame();
@@ -100,8 +105,10 @@ function gameLoop() {
 }
 
 function render() {
+  ctx.imageSmoothingEnabled = false;
   p.render(ctx, arena);
   arena.render(ctx);
+  sans.render(ctx);
 }
 
 function clearFrame() {
@@ -110,4 +117,6 @@ function clearFrame() {
   ctx.restore();
 }
 
-requestAnimationFrame(gameLoop);
+function main() {
+  requestAnimationFrame(gameLoop);
+}

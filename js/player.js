@@ -2,8 +2,7 @@ class Player {
   constructor(x, y, color = "#c70021") {
     this.x = x;
     this.y = y;
-    this.texture = new Image();
-    this.texture.src = "../textures/PlayerHeart.png";
+    this.texture = document.getElementById("player-heart");
 
     this.boundingBoxWidth = 14;
     this.boundingBoxHeight = 14;
@@ -14,13 +13,19 @@ class Player {
 
     this.grav = 0.1;
     this.jumpVel = 3.5;
+
     // 0 free move - red
     // 1 grav-based move - blue
-    this.mode = 1;
+    this.mode = 0;
     this.color = this.mode == 0 ? color : "#2000bf";
 
     this.isJumping = false;
     this.isGrounded = true;
+  }
+
+  changeMode(mode) {
+    this.mode = mode;
+    this.color = this.mode == 0 ? "#c70021" : "#2000bf";
   }
 
   move(dirVector) {
@@ -28,8 +33,6 @@ class Player {
     if (p.mode == 0) {
       this.velY = dirVector.DOWN * this.speed + -dirVector.UP * this.speed;
     }
-    // this.gravVel *= this.gravAcc;
-    // this.velY += 1;
   }
 
   jump() {

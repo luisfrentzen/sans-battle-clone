@@ -14,3 +14,7 @@ body {
 #canv {
   background-color: black;
 }
+
+.texture {
+  display: none;
+}
