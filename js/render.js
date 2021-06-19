@@ -47,6 +47,12 @@ function onKeyUp(e) {
       dirVector.DOWN = 0;
       p.move(dirVector);
       break;
+    case 32:
+      if (!inGame) {
+        inGame = true;
+        bgMusic.play();
+        requestAnimationFrame(gameLoop);
+      }
     default:
   }
 }
@@ -81,6 +87,8 @@ function onKeyDown(e) {
 window.addEventListener("keydown", onKeyDown, false);
 window.addEventListener("keyup", onKeyUp, false);
 
+var inGame = true;
+
 const arenaWitdh = 150;
 const arenaHeigth = 150;
 
@@ -88,14 +96,21 @@ const dpr = Math.ceil(window.devicePixelRatio);
 const c = prepCanvas(document.getElementById("canv"));
 const ctx = c.getContext("2d");
 
+const actCanvWidth = parseInt(c.style.width, 10);
+const actCanvHeight = parseInt(c.style.height, 10);
 const p = new Player(0, 0);
-p.x = parseInt(c.style.width, 10) / 2 - p.boundingBoxWidth / 2;
-p.y = parseInt(c.style.height, 10) * (4 / 6);
+
+p.x = actCanvWidth / 2 - p.boundingBoxWidth / 2;
+p.y = actCanvHeight * (4 / 6);
 
 const arena = new Arena(arenaWitdh, arenaHeigth);
 const sans = new Sans(0, 0);
-sans.x = parseInt(c.style.width, 10) / 2 - sans.width / 2;
-sans.y = arena.y - sans.height - 12;
+sans.x = actCanvWidth / 2 - sans.width / 2;
+sans.y = arena.y - sans.height - 16;
+
+const bgMusic = document.getElementById("bg-music");
+
+const bone = new Bone(400, 450, 5);
 
 function gameLoop() {
   clearFrame();
@@ -108,7 +123,26 @@ function render() {
   ctx.imageSmoothingEnabled = false;
   p.render(ctx, arena);
   arena.render(ctx);
+  bone.render(ctx);
+  maskArena();
   sans.render(ctx);
+}
+
+function maskArena() {
+  let maskX = actCanvWidth / 2 - arena.currentWidth / 2;
+  let maskY = actCanvHeight * (4 / 5) + arena.borderWidth;
+
+  ctx.beginPath();
+  ctx.rect(
+    maskX - arena.borderWidth / 2,
+    maskY - arena.borderWidth / 2,
+    arena.currentWidth + arena.borderWidth,
+    -(arena.currentHeight + arena.borderWidth)
+  );
+  ctx.rect(actCanvWidth, actCanvHeight, -actCanvWidth, -actCanvHeight);
+  ctx.fillStyle = "black";
+  ctx.fill();
+  ctx.closePath();
 }
 
 function clearFrame() {

@@ -9,7 +9,7 @@ class Sans {
     this.body = document.getElementById("sans-torso");
     this.head = document.getElementById("sans-head");
     this.leg = document.getElementById("sans-legs");
-    this.headGap = 6;
+    this.headGap = 5;
 
     this.scale = 2;
     this.width = this.body.width * this.scale;

@@ -7,16 +7,21 @@
     <title>Document</title>
     <link rel="stylesheet" href="../css/style.css">
 </head>
-<script src="../js/player.js"></script>
-<script src="../js/arena.js"></script>
-<script src="../js/sans.js"></script>
 <script defer src="../js/render.js"></script>
 <body>
+    <audio id="bg-music">
+        <source src="../files/BattleMusic_Megalovania.ogg" type="audio/ogg">
+    </audio>
     <img class="texture" id="sans-torso" src="../textures/SansTorso/Default/000.png" alt="">
     <img class="texture" id="sans-head" src="../textures/SansHead/Default/000.png" alt="">
     <img class="texture" id="sans-legs" src="../textures/SansLegs/Standing/000.png" alt="">
     <img class="texture" id="combat-border" src="../textures/CombatZoneUnclipper.png" alt="">
     <img class="texture" id="player-heart" src="../textures/PlayerHeart.png" alt="">
+    <img class="texture" id="v-bone" src="../textures/BoneV.png">
     <canvas id="canv"></canvas>
 </body>
+<script src="../js/player.js"></script>
+<script src="../js/arena.js"></script>
+<script src="../js/sans.js"></script>
+<script src="../js/bone.js"></script>
 </html>
