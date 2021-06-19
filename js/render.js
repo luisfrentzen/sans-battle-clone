@@ -110,12 +110,35 @@ sans.y = arena.y - sans.height - 16;
 
 const bgMusic = document.getElementById("bg-music");
 
-const bone = new Bone(400, 450, 5);
+const hostileAreas = [];
+
+function addVerticalBones(x, y, h) {
+  hostileAreas.push(new VerticalBone(x, y, h));
+}
+
+function addHorizontalBones(x, y, w) {
+  hostileAreas.push(new HorizontalBone(x, y, w));
+}
+
+function renderHostiles(ctx) {
+  hostileAreas.forEach((hostiles) => {
+    hostiles.render(ctx);
+  });
+}
+
+function checkCollideWithHostiles() {
+  hostileAreas.forEach((hostiles) => {
+    if (hostiles.isColliding(p)) {
+      console.log("collided");
+      return;
+    }
+  });
+}
 
 function gameLoop() {
   clearFrame();
   render();
-
+  checkCollideWithHostiles();
   requestAnimationFrame(gameLoop);
 }
 
@@ -123,7 +146,7 @@ function render() {
   ctx.imageSmoothingEnabled = false;
   p.render(ctx, arena);
   arena.render(ctx);
-  bone.render(ctx);
+  renderHostiles(ctx);
   maskArena();
   sans.render(ctx);
 }

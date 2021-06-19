@@ -25,7 +25,7 @@ class Sans {
     this.headMovementX = 0;
     this.headMovementY = 0;
     this.headMoveSpeedX = 0.015 * this.scale;
-    this.headMoveSpeedY = 0.017 * this.scale;
+    this.headMoveSpeedY = 0.016 * this.scale;
   }
 
   update() {
@@ -45,7 +45,7 @@ class Sans {
     if (this.headMovementX > 0.62 * this.scale || this.headMovementX < 0) {
       this.headMoveSpeedX *= -1;
     }
-    if (this.headMovementY < -0.36 * this.scale || this.headMovementY > 0) {
+    if (this.headMovementY < -0.34 * this.scale || this.headMovementY > 0) {
       this.headMoveSpeedY *= -1;
     }
   }
