@@ -1,6 +1,6 @@
 class Arena {
   constructor(width, height) {
-    this.resizeSpeed = 16;
+    this.resizeSpeed = 12;
 
     this.width = width + (this.resizeSpeed - (width % this.resizeSpeed));
     this.height = height + (this.resizeSpeed - (height % this.resizeSpeed));

@@ -9,7 +9,15 @@ class Sans {
     this.body = document.getElementById("sans-torso");
     this.head = document.getElementById("sans-head");
     this.leg = document.getElementById("sans-legs");
-    this.headGap = 5;
+
+    this.headGap = 6;
+
+    this.handsUpFrames = document.getElementsByClassName("sans-hand-up");
+    this.handsDownFrames = document.getElementsByClassName("sans-hand-down");
+    this.handsRightFrames = document.getElementsByClassName("sans-hand-right");
+    this.handsLeftFrames = document.getElementsByClassName("sans-hand-left");
+
+    this.animationSpeed = 2;
 
     this.scale = 2;
     this.width = this.body.width * this.scale;
@@ -19,34 +27,41 @@ class Sans {
 
     this.bodyMovementX = 0;
     this.bodyMovementY = 0;
-    this.bodyMoveSpeedX = 0.015 * this.scale;
-    this.bodyMoveSpeedY = 0.015 * this.scale;
+    this.bodyMoveSpeedX = 0.019 * this.scale;
+    this.bodyMoveSpeedY = 0.019 * this.scale;
 
     this.headMovementX = 0;
-    this.headMovementY = 0;
-    this.headMoveSpeedX = 0.015 * this.scale;
-    this.headMoveSpeedY = 0.016 * this.scale;
+    this.headMovementY = 0.04;
+    this.headMoveSpeedX = 0.019 * this.scale;
+    this.headMoveSpeedY = 0.0225 * this.scale;
+    this.isMoving = true;
+  }
+
+  playAnimation(frames) {
+    frames.forEach((f) => {});
   }
 
   update() {
-    this.bodyMovementX += this.bodyMoveSpeedX;
-    this.bodyMovementY += this.bodyMoveSpeedY;
+    if (this.isMoving) {
+      this.bodyMovementX += this.bodyMoveSpeedX;
+      this.bodyMovementY += this.bodyMoveSpeedY;
 
-    if (this.bodyMovementX > 0.62 * this.scale || this.bodyMovementX < 0) {
-      this.bodyMoveSpeedX *= -1;
-    }
-    if (this.bodyMovementY < -0.3 * this.scale || this.bodyMovementY > 0) {
-      this.bodyMoveSpeedY *= -1;
-    }
+      if (this.bodyMovementX > 0.63 * this.scale || this.bodyMovementX < 0) {
+        this.bodyMoveSpeedX *= -1;
+      }
+      if (this.bodyMovementY < -0.3 * this.scale || this.bodyMovementY > 0) {
+        this.bodyMoveSpeedY *= -1;
+      }
 
-    this.headMovementX += this.headMoveSpeedX;
-    this.headMovementY += this.headMoveSpeedY;
+      this.headMovementX += this.headMoveSpeedX;
+      this.headMovementY += this.headMoveSpeedY;
 
-    if (this.headMovementX > 0.62 * this.scale || this.headMovementX < 0) {
-      this.headMoveSpeedX *= -1;
-    }
-    if (this.headMovementY < -0.34 * this.scale || this.headMovementY > 0) {
-      this.headMoveSpeedY *= -1;
+      if (this.headMovementX > 0.63 * this.scale || this.headMovementX < 0) {
+        this.headMoveSpeedX *= -1;
+      }
+      if (this.headMovementY < -0.3 * this.scale || this.headMovementY > 0.04) {
+        this.headMoveSpeedY *= -1;
+      }
     }
   }
 

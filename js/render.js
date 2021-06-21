@@ -87,30 +87,45 @@ function onKeyDown(e) {
 window.addEventListener("keydown", onKeyDown, false);
 window.addEventListener("keyup", onKeyUp, false);
 
-var inGame = true;
+var arenaWidth = 0,
+  arenaHeigth = 0;
+var dpr = 0,
+  c = {},
+  ctx = {};
+var p = {},
+  arena = {},
+  sans = {};
+var actCanvHeight = 0,
+  actCanvWidth = 0;
+var hostileAreas = [];
+var bgMusic = {};
 
-const arenaWitdh = 150;
-const arenaHeigth = 150;
+var inGame = false;
 
-const dpr = Math.ceil(window.devicePixelRatio);
-const c = prepCanvas(document.getElementById("canv"));
-const ctx = c.getContext("2d");
+function initGame() {
+  inGame = true;
 
-const actCanvWidth = parseInt(c.style.width, 10);
-const actCanvHeight = parseInt(c.style.height, 10);
-const p = new Player(0, 0);
+  dpr = Math.ceil(window.devicePixelRatio);
+  c = prepCanvas(document.getElementById("canv"));
+  ctx = c.getContext("2d");
 
-p.x = actCanvWidth / 2 - p.boundingBoxWidth / 2;
-p.y = actCanvHeight * (4 / 6);
+  bgMusic = document.getElementById("bg-music");
 
-const arena = new Arena(arenaWitdh, arenaHeigth);
-const sans = new Sans(0, 0);
-sans.x = actCanvWidth / 2 - sans.width / 2;
-sans.y = arena.y - sans.height - 16;
+  actCanvWidth = parseInt(c.style.width, 10);
+  actCanvHeight = parseInt(c.style.height, 10);
 
-const bgMusic = document.getElementById("bg-music");
+  p = new Player(0, 0);
+  p.x = actCanvWidth / 2 - p.boundingBoxWidth / 2;
+  p.y = actCanvHeight * (4 / 6);
 
-const hostileAreas = [];
+  arenaWidth = 150;
+  arenaHeigth = 150;
+  arena = new Arena(arenaWidth, arenaHeigth);
+
+  sans = new Sans(0, 0);
+  sans.x = actCanvWidth / 2 - sans.width / 2;
+  sans.y = arena.y - arena.currentHeight - 8;
+}
 
 function addVerticalBones(x, y, h) {
   hostileAreas.push(new VerticalBone(x, y, h));
@@ -175,5 +190,6 @@ function clearFrame() {
 }
 
 function main() {
+  initGame();
   requestAnimationFrame(gameLoop);
 }

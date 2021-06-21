@@ -7,23 +7,50 @@
     <title>Document</title>
     <link rel="stylesheet" href="../css/style.css">
 </head>
+<script defer src="../js/player.js"></script>
+<script defer src="../js/arena.js"></script>
+<script defer src="../js/sans.js"></script>
+<script defer src="../js/hostile_block.js"></script>
+<script defer src="../js/bone.js"></script>
 <script defer src="../js/render.js"></script>
 <body>
     <audio id="bg-music">
         <source src="../files/BattleMusic_Megalovania.ogg" type="audio/ogg">
     </audio>
+
     <img class="texture" id="sans-torso" src="../textures/SansTorso/Default/000.png" alt="">
     <img class="texture" id="sans-head" src="../textures/SansHead/Default/000.png" alt="">
     <img class="texture" id="sans-legs" src="../textures/SansLegs/Standing/000.png" alt="">
+
+    <img class="texture sans-hand-down" src="../textures/SansBody/HandDown/000.png" alt="">
+    <img class="texture sans-hand-down" src="../textures/SansBody/HandDown/001.png" alt="">
+    <img class="texture sans-hand-down" src="../textures/SansBody/HandDown/002.png" alt="">
+    <img class="texture sans-hand-down" src="../textures/SansBody/HandDown/003.png" alt="">
+
+    <img class="texture sans-hand-left" src="../textures/SansBody/HandLeft/000.png" alt="">
+    <img class="texture sans-hand-left" src="../textures/SansBody/HandLeft/001.png" alt="">
+    <img class="texture sans-hand-left" src="../textures/SansBody/HandLeft/002.png" alt="">
+    <img class="texture sans-hand-left" src="../textures/SansBody/HandLeft/003.png" alt="">
+    <img class="texture sans-hand-left" src="../textures/SansBody/HandLeft/004.png" alt="">
+
+    <img class="texture sans-hand-right" src="../textures/SansBody/HandRight/000.png" alt="">
+    <img class="texture sans-hand-right" src="../textures/SansBody/HandRight/001.png" alt="">
+    <img class="texture sans-hand-right" src="../textures/SansBody/HandRight/002.png" alt="">
+    <img class="texture sans-hand-right" src="../textures/SansBody/HandRight/003.png" alt="">
+    <img class="texture sans-hand-right" src="../textures/SansBody/HandRight/004.png" alt="">
+
+    <img class="texture sans-hand-up" src="../textures/SansBody/HandUp/000.png" alt="">
+    <img class="texture sans-hand-up" src="../textures/SansBody/HandUp/001.png" alt="">
+    <img class="texture sans-hand-up" src="../textures/SansBody/HandUp/002.png" alt="">
+    <img class="texture sans-hand-up" src="../textures/SansBody/HandUp/003.png" alt="">
+    <img class="texture sans-hand-up" src="../textures/SansBody/HandUp/004.png" alt="">
+
     <img class="texture" id="combat-border" src="../textures/CombatZoneUnclipper.png" alt="">
+    
     <img class="texture" id="player-heart" src="../textures/PlayerHeart.png" alt="">
+
     <img class="texture" id="v-bone" src="../textures/BoneV.png">
     <img class="texture" id="h-bone" src="../textures/BoneH.png">
     <canvas id="canv"></canvas>
 </body>
-<script src="../js/player.js"></script>
-<script src="../js/arena.js"></script>
-<script src="../js/sans.js"></script>
-<script src="../js/hostile_block.js"></script>
-<script src="../js/bone.js"></script>
 </html>
