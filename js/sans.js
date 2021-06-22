@@ -35,10 +35,14 @@ class Sans {
     this.headMoveSpeedX = 0.019 * this.scale;
     this.headMoveSpeedY = 0.0225 * this.scale;
     this.isMoving = true;
+
+    this.frameToRender = [];
   }
 
   playAnimation(frames) {
-    frames.forEach((f) => {});
+    frames.forEach((f) => {
+      this.frameToRender.add(f);
+    });
   }
 
   update() {
