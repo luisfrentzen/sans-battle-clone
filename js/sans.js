@@ -12,12 +12,18 @@ class Sans {
 
     this.headGap = 6;
 
-    this.handsUpFrames = document.getElementsByClassName("sans-hand-up");
-    this.handsDownFrames = document.getElementsByClassName("sans-hand-down");
-    this.handsRightFrames = document.getElementsByClassName("sans-hand-right");
-    this.handsLeftFrames = document.getElementsByClassName("sans-hand-left");
+    this.handsUpFrames = [...document.getElementsByClassName("sans-hand-up")];
+    this.handsDownFrames = [
+      ...document.getElementsByClassName("sans-hand-down"),
+    ];
+    this.handsRightFrames = [
+      ...document.getElementsByClassName("sans-hand-right"),
+    ];
+    this.handsLeftFrames = [
+      ...document.getElementsByClassName("sans-hand-left"),
+    ];
 
-    this.animationSpeed = 2;
+    this.animationSpeed = 10;
 
     this.scale = 2;
     this.width = this.body.width * this.scale;
@@ -36,12 +42,14 @@ class Sans {
     this.headMoveSpeedY = 0.0225 * this.scale;
     this.isMoving = true;
 
+    this.animationClock = 0;
     this.frameToRender = [];
   }
 
   playAnimation(frames) {
+    this.isMoving = false;
     frames.forEach((f) => {
-      this.frameToRender.add(f);
+      this.frameToRender.push(f);
     });
   }
 
@@ -71,22 +79,40 @@ class Sans {
 
   render(ctx) {
     this.update();
-    ctx.drawImage(
-      this.body,
-      this.x + this.bodyMovementX * this.scale,
-      this.y +
-        (this.head.height - this.headGap + this.bodyMovementY) * this.scale,
-      this.body.width * this.scale,
-      this.body.height * this.scale
-    );
-    ctx.drawImage(
-      this.leg,
-      this.x + (this.body.width / 2 - this.leg.width / 2 + 2) * this.scale,
-      this.y +
-        (this.body.height + this.head.height - this.headGap) * this.scale,
-      this.leg.width * this.scale,
-      this.leg.height * this.scale
-    );
+    if (this.frameToRender.length == 0) {
+      if (!this.isMoving) this.isMoving = true;
+      if (this.animationClock > 0) this.animationClock = 0;
+      ctx.drawImage(
+        this.body,
+        this.x + this.bodyMovementX * this.scale,
+        this.y +
+          (this.head.height - this.headGap + this.bodyMovementY) * this.scale,
+        this.body.width * this.scale,
+        this.body.height * this.scale
+      );
+      ctx.drawImage(
+        this.leg,
+        this.x + (this.body.width / 2 - this.leg.width / 2 + 2) * this.scale,
+        this.y +
+          (this.body.height + this.head.height - this.headGap) * this.scale,
+        this.leg.width * this.scale,
+        this.leg.height * this.scale
+      );
+    } else {
+      this.animationClock++;
+      ctx.drawImage(
+        this.frameToRender[0],
+        this.x - 5,
+        this.y + 5,
+        this.frameToRender[0].width * this.scale,
+        this.frameToRender[0].height * this.scale
+      );
+
+      if (this.animationClock % this.animationSpeed == 0) {
+        this.frameToRender.shift();
+      }
+    }
+
     ctx.drawImage(
       this.head,
       this.x +
