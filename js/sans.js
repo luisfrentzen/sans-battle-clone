@@ -12,16 +12,30 @@ class Sans {
 
     this.headGap = 6;
 
-    this.handsUpFrames = [...document.getElementsByClassName("sans-hand-up")];
-    this.handsDownFrames = [
-      ...document.getElementsByClassName("sans-hand-down"),
-    ];
-    this.handsRightFrames = [
-      ...document.getElementsByClassName("sans-hand-right"),
-    ];
-    this.handsLeftFrames = [
-      ...document.getElementsByClassName("sans-hand-left"),
-    ];
+    this.handsUpFrames = zip([
+      [...document.getElementsByClassName("sans-hand-up")],
+      [0, 0, 0, 0, 0],
+      [3, 5, 4, -1, 1],
+      [2, 2, 2, 2, 2],
+    ]);
+    this.handsDownFrames = zip([
+      [...document.getElementsByClassName("sans-hand-down")],
+      [0, 0, 0, 0],
+      [0, -1, 4, 3],
+      [2, 2, 2, 2],
+    ]);
+    this.handsRightFrames = zip([
+      [...document.getElementsByClassName("sans-hand-right")],
+      [0, -3, -4, 5, 2],
+      [0, 0, 0, 0, 0],
+      [5, 5, 5, 5, 5],
+    ]);
+    this.handsLeftFrames = zip([
+      [...document.getElementsByClassName("sans-hand-left")],
+      [1, 3, -2, -1, 1],
+      [0, 0, 0, 0, 0],
+      [5, 5, 5, 5, 5],
+    ]);
 
     this.animationSpeed = 10;
 
@@ -44,10 +58,13 @@ class Sans {
 
     this.animationClock = 0;
     this.frameToRender = [];
+
+    this.headAnimationX = 0;
+    this.headAnimationY = 0;
   }
 
   playAnimation(frames) {
-    this.isMoving = false;
+    // this.isMoving = false;
     frames.forEach((f) => {
       this.frameToRender.push(f);
     });
@@ -78,8 +95,13 @@ class Sans {
   }
 
   render(ctx) {
+    let headX = 0;
+    let headY = 0;
     this.update();
+
     if (this.frameToRender.length == 0) {
+      this.headAnimationX = 0;
+      this.headAnimationY = 0;
       if (!this.isMoving) this.isMoving = true;
       if (this.animationClock > 0) this.animationClock = 0;
       ctx.drawImage(
@@ -100,12 +122,18 @@ class Sans {
       );
     } else {
       this.animationClock++;
+
+      let frame = this.frameToRender[0][0];
+      headX = this.frameToRender[0][1];
+      headY = this.frameToRender[0][2];
+      let offset = this.frameToRender[0][3];
+
       ctx.drawImage(
-        this.frameToRender[0],
-        this.x - 5,
-        this.y + 5,
-        this.frameToRender[0].width * this.scale,
-        this.frameToRender[0].height * this.scale
+        frame,
+        this.x - offset * this.scale,
+        this.y + this.height - frame.height * this.scale,
+        frame.width * this.scale,
+        frame.height * this.scale
       );
 
       if (this.animationClock % this.animationSpeed == 0) {
@@ -116,9 +144,12 @@ class Sans {
     ctx.drawImage(
       this.head,
       this.x +
-        (this.body.width / 2 - this.head.width / 2 + this.headMovementX) *
+        (this.body.width / 2 -
+          this.head.width / 2 +
+          this.headMovementX +
+          headX) *
           this.scale,
-      this.y + this.headMovementY * this.scale,
+      this.y + (this.headMovementY + headY) * this.scale,
       this.head.width * this.scale,
       this.head.height * this.scale
     );

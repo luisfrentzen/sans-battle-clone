@@ -3,6 +3,14 @@ window.onload = main;
 const red = "#c70021";
 const blue = "#2000bf";
 
+function zip(arrays) {
+  return arrays[0].map(function (_, i) {
+    return arrays.map(function (array) {
+      return array[i];
+    });
+  });
+}
+
 function prepCanvas(canvas, width = 800, height = 600) {
   canvas.style.width = width + "px";
   canvas.style.height = height + "px";
