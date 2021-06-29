@@ -25,34 +25,25 @@ function prepCanvas(canvas, width = 800, height = 600) {
   return canvas;
 }
 
-const dirVector = {
-  UP: 0,
-  DOWN: 0,
-  RIGHT: 0,
-  LEFT: 0,
-};
+const dirVector = [0, 0, 0, 0];
 
 function onKeyUp(e) {
   var k = e.keyCode;
   switch (k) {
     case 37:
-      dirVector.LEFT = 0;
+      dirVector[1] = 0;
       p.move(dirVector);
       break;
     case 39:
-      dirVector.RIGHT = 0;
+      dirVector[3] = 0;
       p.move(dirVector);
       break;
     case 38:
-      dirVector.UP = 0;
+      dirVector[2] = 0;
       p.move(dirVector);
-      if (p.isJumping) {
-        p.isJumping = false;
-        p.velY = 0;
-      }
       break;
     case 40:
-      dirVector.DOWN = 0;
+      dirVector[0] = 0;
       p.move(dirVector);
       break;
     case 32:
@@ -61,7 +52,13 @@ function onKeyUp(e) {
         bgMusic.play();
         requestAnimationFrame(gameLoop);
       }
+      break;
     default:
+  }
+
+  if (p.isJumping) {
+    p.isJumping = false;
+    p.velocity[p.orientation] = 0;
   }
 }
 
@@ -69,24 +66,40 @@ function onKeyDown(e) {
   var k = e.keyCode;
   switch (k) {
     case 37:
-      dirVector.LEFT = 1;
-      p.move(dirVector);
+      if (p.orientation == 3 && p.mode == 1) {
+        p.jump();
+      } else {
+        dirVector[1] = 1;
+        p.move(dirVector);
+      }
+
       break;
     case 39:
-      dirVector.RIGHT = 1;
-      p.move(dirVector);
+      if (p.orientation == 1 && p.mode == 1) {
+        p.jump();
+      } else {
+        dirVector[3] = 1;
+        p.move(dirVector);
+      }
+
       break;
     case 38:
-      if (p.mode == 0) {
-        dirVector.UP = 1;
-        p.move(dirVector);
-      } else {
+      if (p.orientation == 0 && p.mode == 1) {
         p.jump();
+      } else {
+        dirVector[2] = 1;
+        p.move(dirVector);
       }
+
       break;
     case 40:
-      dirVector.DOWN = 1;
-      p.move(dirVector);
+      if (p.orientation == 2 && p.mode == 1) {
+        p.jump();
+      } else {
+        dirVector[0] = 1;
+        p.move(dirVector);
+      }
+
       break;
     default:
   }
@@ -135,12 +148,26 @@ function initGame() {
   sans.y = arena.y - arena.currentHeight - 8;
 }
 
-function addVerticalBones(x, y, h) {
-  hostileAreas.push(new VerticalBone(x, y, h));
+function addVerticalBones(x, y, h, v) {
+  hostileAreas.push(new VerticalBone(x, y, h, v));
 }
 
-function addHorizontalBones(x, y, w) {
-  hostileAreas.push(new HorizontalBone(x, y, w));
+function addHorizontalBones(x, y, w, v) {
+  hostileAreas.push(new HorizontalBone(x, y, w, v));
+}
+
+function destroyHostileObjects(arena) {
+  hostileAreas = hostileAreas.filter((e) => {
+    if (e.x < arena.x - 100 || e.x > arena.x + arena.currentWidth + 100) {
+      return false;
+    }
+
+    if (e.y < arena.y - 100 || e.y > arena.y + arena.currentHeight + 100) {
+      return false;
+    }
+
+    return true;
+  });
 }
 
 function renderHostiles(ctx) {
@@ -152,16 +179,16 @@ function renderHostiles(ctx) {
 function checkCollideWithHostiles() {
   hostileAreas.forEach((hostiles) => {
     if (hostiles.isColliding(p)) {
-      console.log("collided");
       return;
     }
   });
 }
 
-function gameLoop() {
+function gameLoop(now) {
   clearFrame();
   render();
   checkCollideWithHostiles();
+  destroyHostileObjects(arena);
   requestAnimationFrame(gameLoop);
 }
 

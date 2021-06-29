@@ -1,15 +1,16 @@
 class Bone extends HostileBlock {
-  constructor(x, y) {
+  constructor(x, y, v) {
     super(x, y);
     this.scale = 1;
+    this.v = v;
   }
 
   update() {}
 }
 
 class VerticalBone extends Bone {
-  constructor(x, y, h) {
-    super(x, y);
+  constructor(x, y, h, v) {
+    super(x, y, v);
     this.h = h;
 
     this.texture = document.getElementById("v-bone");
@@ -23,7 +24,12 @@ class VerticalBone extends Bone {
     super.hbWidth = this.width;
   }
 
+  update() {
+    this.x += this.v;
+  }
+
   render(ctx) {
+    this.update();
     ctx.drawImage(
       this.texture,
       0,
@@ -72,8 +78,8 @@ class VerticalBone extends Bone {
 }
 
 class HorizontalBone extends Bone {
-  constructor(x, y, w) {
-    super(x, y);
+  constructor(x, y, w, v) {
+    super(x, y, v);
     this.w = w;
 
     this.texture = document.getElementById("h-bone");
@@ -87,7 +93,12 @@ class HorizontalBone extends Bone {
     super.hbWidth = this.width;
   }
 
+  update() {
+    this.y += this.v;
+  }
+
   render(ctx) {
+    this.update();
     ctx.drawImage(
       this.texture,
       0,
