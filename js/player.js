@@ -12,15 +12,20 @@ class Player {
     // this.velY = 0;
     this.velocity = [0, 0, 0, 0];
 
-    this.grav = 0.1;
+    this.normGrav = 0.1;
+    this.slammedGrav = 6.1;
+
+    this.grav = this.normGrav;
+
     this.jumpVel = 3.5;
 
     // 0 free move - red
     // 1 grav-based move - blue
-    this.mode = 1;
+    this.mode = 0;
     this.color = this.mode == 0 ? color : "#2000bf";
 
     this.isJumping = false;
+    this.isSlammed = false;
     this.isGrounded = [false, false, false, false];
 
     //0 normal down
@@ -66,6 +71,12 @@ class Player {
       this.x = leftBorder;
       this.isGrounded[1] = true;
       this.velocity[1] = 0;
+
+      if (this.orientation == 1 && this.isSlammed) {
+        this.isSlammed = false;
+        this.grav = this.normGrav;
+        playerSlammedEffect(ctx, 1, SHAKE_LENGTH);
+      }
     } else {
       this.isGrounded[1] = false;
     }
@@ -74,6 +85,12 @@ class Player {
       this.x = rightBorder - this.boundingBoxWidth;
       this.isGrounded[3] = true;
       this.velocity[3] = 0;
+
+      if (this.orientation == 3 && this.isSlammed) {
+        this.isSlammed = false;
+        this.grav = this.normGrav;
+        playerSlammedEffect(ctx, 3, SHAKE_LENGTH);
+      }
     } else {
       this.isGrounded[3] = false;
     }
@@ -82,6 +99,12 @@ class Player {
       this.y = upperBound;
       this.isGrounded[2] = true;
       this.velocity[2] = 0;
+
+      if (this.orientation == 2 && this.isSlammed) {
+        this.isSlammed = false;
+        this.grav = this.normGrav;
+        playerSlammedEffect(ctx, 2, SHAKE_LENGTH);
+      }
     } else {
       this.isGrounded[2] = false;
     }
@@ -90,6 +113,12 @@ class Player {
       this.y = lowerBound - this.boundingBoxHeight;
       this.isGrounded[0] = true;
       this.velocity[0] = 0;
+
+      if (this.orientation == 0 && this.isSlammed) {
+        this.isSlammed = false;
+        this.grav = this.normGrav;
+        playerSlammedEffect(ctx, 0, SHAKE_LENGTH);
+      }
     } else {
       this.isGrounded[0] = false;
     }
@@ -122,7 +151,12 @@ class Player {
     ctx.globalCompositeOperation = "source-in";
 
     ctx.fillStyle = this.color;
-    ctx.fillRect(0, 0, c.width, c.height);
+    ctx.fillRect(
+      this.x,
+      this.y,
+      this.x + this.boundingBoxWidth,
+      this.y + this.boundingBoxHeight
+    );
     ctx.globalCompositeOperation = "source-over";
     ctx.restore();
   }

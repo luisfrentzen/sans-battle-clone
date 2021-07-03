@@ -37,7 +37,7 @@ class Sans {
       [5, 5, 5, 5, 5],
     ]);
 
-    this.animationSpeed = 10;
+    this.animationSpeed = 6;
 
     this.scale = 2;
     this.width = this.body.width * this.scale;
@@ -137,7 +137,9 @@ class Sans {
       );
 
       if (this.animationClock % this.animationSpeed == 0) {
-        this.frameToRender.shift();
+        if (this.frameToRender.length != 1) {
+          this.frameToRender.shift();
+        }
       }
     }
 

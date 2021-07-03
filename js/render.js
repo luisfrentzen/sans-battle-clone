@@ -1,5 +1,7 @@
 window.onload = main;
 
+const SHAKE_LENGTH = 8;
+
 const red = "#c70021";
 const blue = "#2000bf";
 
@@ -110,16 +112,26 @@ window.addEventListener("keyup", onKeyUp, false);
 
 var arenaWidth = 0,
   arenaHeigth = 0;
+
 var dpr = 0,
   c = {},
   ctx = {};
+
 var p = {},
   arena = {},
   sans = {};
+
 var actCanvHeight = 0,
   actCanvWidth = 0;
+
 var hostileAreas = [];
+var shakeFrames = [];
+var warningAreas = [];
+
 var bgMusic = {};
+var slamSound = {};
+var bonestabSound = {};
+var warningSound = {};
 
 var inGame = false;
 
@@ -131,6 +143,9 @@ function initGame() {
   ctx = c.getContext("2d");
 
   bgMusic = document.getElementById("bg-music");
+  slamSound = document.getElementById("slam-sound");
+  bonestabSound = document.getElementById("bone-stab-sound");
+  warningSound = document.getElementById("warning-sound");
 
   actCanvWidth = parseInt(c.style.width, 10);
   actCanvHeight = parseInt(c.style.height, 10);
@@ -156,6 +171,10 @@ function addHorizontalBones(x, y, w, v) {
   hostileAreas.push(new HorizontalBone(x, y, w, v));
 }
 
+function addWarningAreas(arena, dir, h) {
+  warningAreas.push(new WarningArea(arena, dir, h));
+}
+
 function destroyHostileObjects(arena) {
   hostileAreas = hostileAreas.filter((e) => {
     if (e.x < arena.x - 100 || e.x > arena.x + arena.currentWidth + 100) {
@@ -173,6 +192,12 @@ function destroyHostileObjects(arena) {
 function renderHostiles(ctx) {
   hostileAreas.forEach((hostiles) => {
     hostiles.render(ctx);
+  });
+}
+
+function renderWarnings(ctx) {
+  warningAreas.forEach((warn) => {
+    warn.render(ctx);
   });
 }
 
@@ -194,11 +219,27 @@ function gameLoop(now) {
 
 function render() {
   ctx.imageSmoothingEnabled = false;
+
+  if (shakeFrames.length != 0) {
+    ctx.translate(shakeFrames[0][0], shakeFrames[0][1]);
+    shakeFrames.shift();
+
+    if (shakeFrames.length == 0) ctx.restore();
+  }
+
   p.render(ctx, arena);
   arena.render(ctx);
+  renderWarnings(ctx);
+
   renderHostiles(ctx);
-  maskArena();
+  // maskArena();
   sans.render(ctx);
+}
+
+function addShakeValues(val) {
+  val.forEach((e) => {
+    shakeFrames.push(e);
+  });
 }
 
 function maskArena() {
