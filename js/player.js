@@ -51,7 +51,7 @@ class Player {
   }
 
   jump() {
-    if (this.isGrounded[this.orientation]) {
+    if (this.isGrounded[this.orientation] && !this.isJumping) {
       this.velocity[this.orientation] -= this.jumpVel;
       this.isJumping = true;
     }
@@ -76,6 +76,7 @@ class Player {
         this.isSlammed = false;
         this.grav = this.normGrav;
         playerSlammedEffect(ctx, 1, SHAKE_LENGTH);
+        warnBoneStab(ctx, 1);
       }
     } else {
       this.isGrounded[1] = false;
@@ -90,6 +91,7 @@ class Player {
         this.isSlammed = false;
         this.grav = this.normGrav;
         playerSlammedEffect(ctx, 3, SHAKE_LENGTH);
+        warnBoneStab(ctx, 3);
       }
     } else {
       this.isGrounded[3] = false;
@@ -104,6 +106,7 @@ class Player {
         this.isSlammed = false;
         this.grav = this.normGrav;
         playerSlammedEffect(ctx, 2, SHAKE_LENGTH);
+        warnBoneStab(ctx, 2);
       }
     } else {
       this.isGrounded[2] = false;
@@ -118,6 +121,7 @@ class Player {
         this.isSlammed = false;
         this.grav = this.normGrav;
         playerSlammedEffect(ctx, 0, SHAKE_LENGTH);
+        warnBoneStab(ctx, 0);
       }
     } else {
       this.isGrounded[0] = false;
@@ -125,9 +129,9 @@ class Player {
 
     if (!this.isGrounded[this.orientation] && this.mode == 1) {
       this.velocity[this.orientation] += this.grav;
-      if (this.velocity[this.orientation] > -1 && this.isJumping) {
-        this.isJumping = false;
-      }
+      // if (this.velocity[this.orientation] > -1 && this.isJumping) {
+      //   this.isJumping = false;
+      // }
     }
 
     ctx.translate(

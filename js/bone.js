@@ -70,10 +70,6 @@ class VerticalBone extends Bone {
       this.width * this.scale,
       this.unit * this.scale
     );
-
-    ctx.lineWidth = "1";
-    ctx.strokeStyle = "red";
-    ctx.strokeRect(this.x, this.y, this.hbWidth, this.hbHeight);
   }
 }
 
@@ -139,9 +135,156 @@ class HorizontalBone extends Bone {
       this.unit * this.scale,
       this.height * this.scale
     );
+  }
+}
 
-    ctx.lineWidth = "1";
-    ctx.strokeStyle = "red";
-    ctx.strokeRect(this.x, this.y, this.hbWidth, this.hbHeight);
+class HorizontalBoneStreak extends HorizontalBone {
+  constructor(x, y, w, v, n, bound, hold) {
+    super(x, y, w, v);
+    this.n = n;
+    this.bound = bound < 0 ? this.x + bound : this.x + this.hbWidth + bound;
+    this.hbHeight = this.texture.height * (5 / 4) * n;
+    this.hold = hold;
+    this.holdframes = hold;
+  }
+
+  update() {
+    this.x += this.v;
+
+    if (
+      this.bound < this.x
+        ? this.x < this.bound
+        : this.x + this.hbWidth > this.bound
+    ) {
+      if (this.holdframes > 0) {
+        this.holdframes--;
+        this.x -= this.v;
+      } else {
+        this.v *= -1;
+        this.holdframes = this.hold;
+      }
+    }
+  }
+
+  render(ctx) {
+    this.update();
+    for (let j = 0; j < this.n; j++) {
+      ctx.drawImage(
+        this.texture,
+        0,
+        0,
+        this.unit,
+        this.height,
+        this.x,
+        this.y + j * this.texture.height * (5 / 4),
+        this.unit * this.scale,
+        this.height * this.scale
+      );
+
+      let offset = this.unit * this.scale;
+      for (let i = 0; i < this.w - 2; i++) {
+        ctx.drawImage(
+          this.texture,
+          this.unit,
+          0,
+          this.unit,
+          this.height,
+          this.x + offset,
+          this.y + j * this.texture.height * (5 / 4),
+          this.unit * this.scale,
+          this.height * this.scale
+        );
+
+        offset += this.unit * this.scale;
+      }
+
+      ctx.drawImage(
+        this.texture,
+        this.unit * 2,
+        0,
+        this.unit,
+        this.height,
+        this.x + offset,
+        this.y + j * this.texture.height * (5 / 4),
+        this.unit * this.scale,
+        this.height * this.scale
+      );
+    }
+  }
+}
+
+class VerticalBoneStreak extends VerticalBone {
+  constructor(x, y, h, v, n, bound, hold) {
+    super(x, y, h, v);
+    this.n = n;
+    this.bound = bound < 0 ? this.y + bound : this.y + this.hbHeight + bound;
+    this.hbWidth = this.texture.width * (5 / 4) * n;
+    this.hold = hold;
+    this.holdframes = hold;
+  }
+
+  update() {
+    this.y += this.v;
+
+    if (
+      this.bound < this.y
+        ? this.y < this.bound
+        : this.y + this.hbHeight > this.bound
+    ) {
+      if (this.holdframes > 0) {
+        this.holdframes--;
+        this.y -= this.v;
+      } else {
+        this.v *= -1;
+        this.holdframes = this.hold;
+      }
+    }
+  }
+
+  render(ctx) {
+    this.update();
+
+    for (let j = 0; j < this.n; j++) {
+      ctx.drawImage(
+        this.texture,
+        0,
+        0,
+        this.width,
+        this.unit,
+        this.x + j * this.texture.width * (5 / 4),
+        this.y,
+        this.width * this.scale,
+        this.unit * this.scale
+      );
+
+      let offset = this.unit * this.scale;
+      for (let i = 0; i < this.h - 2; i++) {
+        ctx.drawImage(
+          this.texture,
+          0,
+          this.unit,
+          this.width,
+          this.unit,
+          this.x + j * this.texture.width * (5 / 4),
+          this.y + offset,
+          this.width * this.scale,
+          this.unit * this.scale
+        );
+
+        offset += this.unit * this.scale;
+      }
+
+      ctx.drawImage(
+        this.texture,
+        0,
+        this.unit * 2,
+        this.width,
+        this.unit,
+        this.x + j * this.texture.width * (5 / 4),
+        this.y + offset,
+        this.width * this.scale,
+        this.unit * this.scale
+      );
+    }
   }
 }

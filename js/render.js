@@ -1,6 +1,7 @@
 window.onload = main;
 
 const SHAKE_LENGTH = 8;
+const DEFAULT_WARNING_H = 50;
 
 const red = "#c70021";
 const blue = "#2000bf";
@@ -136,7 +137,7 @@ var warningSound = {};
 var inGame = false;
 
 function initGame() {
-  inGame = true;
+  inGame = false;
 
   dpr = Math.ceil(window.devicePixelRatio);
   c = prepCanvas(document.getElementById("canv"));
@@ -169,6 +170,14 @@ function addVerticalBones(x, y, h, v) {
 
 function addHorizontalBones(x, y, w, v) {
   hostileAreas.push(new HorizontalBone(x, y, w, v));
+}
+
+function addHorizontalBoneStreak(x, y, w, n, bound, hold = 30, v = 10) {
+  hostileAreas.push(new HorizontalBoneStreak(x, y, w, v, n, bound, hold));
+}
+
+function addVerticallBoneStreak(x, y, h, n, bound, hold = 30, v = 10) {
+  hostileAreas.push(new VerticalBoneStreak(x, y, h, v, n, bound, hold));
 }
 
 function addWarningAreas(arena, dir, h) {
@@ -232,7 +241,7 @@ function render() {
   renderWarnings(ctx);
 
   renderHostiles(ctx);
-  // maskArena();
+  maskArena();
   sans.render(ctx);
 }
 

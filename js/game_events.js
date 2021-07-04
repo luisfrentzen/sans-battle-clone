@@ -19,6 +19,7 @@ function slamPlayer(dir) {
     p.orientation = dir;
     p.isSlammed = true;
     p.grav = p.slammedGrav;
+    p.velocity = [0, 0, 0, 0];
   }, 390);
 }
 
@@ -47,6 +48,40 @@ function playerSlammedEffect(ctx, dir, frameCount) {
   slamSound.play();
 }
 
-function boneStab(ctx, dir) {
-  slamPlayer(dir);
+function warnBoneStab(ctx, dir) {
+  addWarningAreas(arena, dir, DEFAULT_WARNING_H);
+  let fx = document.getElementById("warning-sound");
+  fx.play();
+
+  setTimeout(() => {
+    warningAreas.shift();
+    boneStab(dir);
+  }, 500);
+}
+
+function boneStab(dir) {
+  let fx = document.getElementById("bone-stab-sound");
+  fx.play();
+
+  if (dir % 2 == 0) {
+    addVerticallBoneStreak(
+      arena.x + 5,
+      dir == 0 ? arena.y + arena.currentHeight + 20 : arena.y - 85,
+      12,
+      12,
+      dir == 0 ? -80 : 40,
+      undefined,
+      dir == 0 ? -10 : 10
+    );
+  } else {
+    addHorizontalBoneStreak(
+      dir == 3 ? arena.x + arena.currentWidth + 20 : arena.x - 85,
+      arena.y + 5,
+      12,
+      12,
+      dir == 3 ? -80 : 40,
+      undefined,
+      dir == 3 ? -10 : 10
+    );
+  }
 }
