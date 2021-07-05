@@ -1,7 +1,38 @@
 class Gaster {
-  constructor(x, y, dir, scale = 3) {
-    this.x = x;
-    this.y = y;
+  constructor(x, y, dir, scale = 3, arena) {
+    this.targetX = x;
+    this.targetY = y;
+
+    let phX = 0;
+    let phY = 0;
+    phX = arena.currentWidth / 2 + Math.round(Math.random() * 100);
+    phY = arena.currentHeight / 2 + Math.round(Math.random() * 100);
+
+    if (
+      this.targetX < arena.x + arena.currentWidth / 2 &&
+      this.targetY < arena.y + arena.currentHeight / 2
+    ) {
+      phX = this.targetX - phX;
+      phY = this.targetY - phY;
+    } else if (
+      this.targetX < arena.x + arena.currentWidth / 2 &&
+      this.targetY < arena.y + arena.currentHeight
+    ) {
+      phX = this.targetX - phX;
+      phY = this.targetY + phY;
+    } else if (
+      this.targetX < arena.x + arena.currentWidth &&
+      this.targetY < arena.y + arena.currentHeight / 2
+    ) {
+      phX = this.targetX + phX;
+      phY = this.targetY - phY;
+    } else {
+      phX = this.targetX + phX;
+      phY = this.targetY + phY;
+    }
+
+    this.x = phX;
+    this.y = phY;
     this.scale = scale;
 
     this.texture = document.getElementById("gaster-default");
@@ -18,12 +49,37 @@ class Gaster {
     this.animationClock = 0;
     this.animationSpeed = 3;
 
+    this.nIntroFrame = 10;
+
+    let velX = (this.targetX - this.x) / this.nIntroFrame;
+    let velY = (this.targetY - this.y) / this.nIntroFrame;
+
+    this.velocity = [
+      velY > 0 ? velY : 0,
+      velX < 0 ? velX : 0,
+      velY < 0 ? velY : 0,
+      velX > 0 ? velX : 0,
+    ];
+
     this.fx = document.getElementById("gaster-blaster-sound");
 
+    console.log(this.velocity);
     this.fx.play();
   }
 
-  update() {}
+  update() {
+    this.y += this.velocity[0];
+    this.y += this.velocity[2];
+    this.x += this.velocity[1];
+    this.x += this.velocity[3];
+
+    if (
+      Math.round(this.x) == this.targetX &&
+      Math.round(this.y) == this.targetY
+    ) {
+      this.velocity = [0, 0, 0, 0];
+    }
+  }
 
   intro() {}
 
@@ -39,6 +95,7 @@ class Gaster {
   }
 
   render(ctx) {
+    // console.log(this.x, this.y);
     this.update();
     ctx.save();
     ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
