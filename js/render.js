@@ -134,13 +134,15 @@ var slamSound = {};
 var bonestabSound = {};
 var warningSound = {};
 
+var gasterList = [];
+
 var inGame = false;
 
 function initGame() {
   inGame = false;
 
   dpr = Math.ceil(window.devicePixelRatio);
-  c = prepCanvas(document.getElementById("canv"));
+  c = prepCanvas(document.getElementById("canv"), 600, 450);
   ctx = c.getContext("2d");
 
   bgMusic = document.getElementById("bg-music");
@@ -204,6 +206,12 @@ function renderHostiles(ctx) {
   });
 }
 
+function renderGasters(ctx) {
+  gasterList.forEach((gaster) => {
+    gaster.render(ctx);
+  });
+}
+
 function renderWarnings(ctx) {
   warningAreas.forEach((warn) => {
     warn.render(ctx);
@@ -239,10 +247,10 @@ function render() {
   p.render(ctx, arena);
   arena.render(ctx);
   renderWarnings(ctx);
-
   renderHostiles(ctx);
   maskArena();
   sans.render(ctx);
+  renderGasters(ctx);
 }
 
 function addShakeValues(val) {
