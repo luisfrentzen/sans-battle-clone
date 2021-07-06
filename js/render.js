@@ -186,18 +186,29 @@ function addWarningAreas(arena, dir, h) {
   warningAreas.push(new WarningArea(arena, dir, h));
 }
 
-function destroyHostileObjects(arena) {
-  hostileAreas = hostileAreas.filter((e) => {
-    if (e.x < arena.x - 100 || e.x > arena.x + arena.currentWidth + 100) {
+function hostileDestroyerFilter(arena) {
+  return function (e) {
+    if (
+      (e.x < -300 || e.x > arena.x + actCanvWidth + 300) &&
+      e.readyToDestroy
+    ) {
       return false;
     }
 
-    if (e.y < arena.y - 100 || e.y > arena.y + arena.currentHeight + 100) {
+    if (
+      (e.y < -300 || e.y > arena.y + actCanvHeight + 300) &&
+      e.readyToDestroy
+    ) {
       return false;
     }
 
     return true;
-  });
+  };
+}
+
+function destroyHostileObjects(arena) {
+  hostileAreas = hostileAreas.filter(hostileDestroyerFilter(arena));
+  gasterList = gasterList.filter(hostileDestroyerFilter(arena));
 }
 
 function renderHostiles(ctx) {
@@ -222,6 +233,15 @@ function checkCollideWithHostiles() {
   hostileAreas.forEach((hostiles) => {
     if (hostiles.isColliding(p)) {
       return;
+    }
+  });
+
+  gasterList.forEach((gaster) => {
+    if (gaster.gasterBlast.length > 0) {
+      if (gaster.gasterBlast[0].isColliding(p)) {
+        console.count("collide");
+        return;
+      }
     }
   });
 }

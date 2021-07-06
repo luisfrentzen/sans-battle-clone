@@ -38,6 +38,7 @@ class GasterBlast extends HostileBlock {
     }
 
     if (this.blastWidthFactor <= 0) {
+      this.gaster.readyToDestroy = true;
       this.gaster.gasterBlast.pop();
     }
 
@@ -58,6 +59,11 @@ class GasterBlast extends HostileBlock {
     let tertiaryBlasterHeight =
       (this.gaster.height - 36 * this.gaster.scale) * this.blastWidthFactor;
 
+    this.x = this.gaster.x + this.gaster.width + 8 * this.gaster.scale;
+    this.y = this.gaster.y + this.gaster.height / 2 - mainBlastHeight / 2;
+    this.hbWidth = actCanvWidth * 10;
+    this.hbHeight = mainBlastHeight;
+
     ctx.beginPath();
     ctx.fillStyle = "white";
     ctx.fillRect(
@@ -77,7 +83,7 @@ class GasterBlast extends HostileBlock {
     ctx.fillRect(
       this.gaster.x + this.gaster.width + 8 * this.gaster.scale,
       this.gaster.y + this.gaster.height / 2 - mainBlastHeight / 2,
-      actCanvWidth * 2,
+      actCanvWidth * 10,
       mainBlastHeight
     );
 

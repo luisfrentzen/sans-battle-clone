@@ -3,6 +3,7 @@ class Bone extends HostileBlock {
     super(x, y);
     this.scale = 1;
     this.v = v;
+    this.readyToDestroy = true;
   }
 
   update() {}

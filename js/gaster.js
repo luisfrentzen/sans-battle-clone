@@ -31,6 +31,8 @@ class Gaster {
       phY = this.targetY + phY;
     }
 
+    this.acc = 1;
+
     this.x = phX;
     this.y = phY;
     this.scale = scale;
@@ -61,6 +63,11 @@ class Gaster {
       velX > 0 ? velX : 0,
     ];
 
+    this.rotDeg = 0;
+    this.targetRotDeg = (Math.PI * (1 + this.dir)) / 2;
+
+    this.rotVel = this.targetRotDeg / this.nIntroFrame;
+
     this.fx = document.getElementById("gaster-blaster-sound");
 
     console.log(this.velocity);
@@ -68,10 +75,12 @@ class Gaster {
   }
 
   update() {
-    this.y += this.velocity[0];
-    this.y += this.velocity[2];
-    this.x += this.velocity[1];
-    this.x += this.velocity[3];
+    this.y += this.velocity[0] *= this.acc;
+    this.y -= Math.abs((this.velocity[2] *= this.acc));
+    this.x -= Math.abs((this.velocity[1] *= this.acc));
+    this.x += this.velocity[3] *= this.acc;
+
+    this.rotDeg += this.rotVel;
 
     if (
       Math.round(this.x) == this.targetX &&
@@ -79,11 +88,12 @@ class Gaster {
     ) {
       this.velocity = [0, 0, 0, 0];
     }
+
+    if (this.rotDeg > this.targetRotDeg) {
+      this.rotDeg = this.targetRotDeg;
+      this.rotVel = 0;
+    }
   }
-
-  intro() {}
-
-  outro() {}
 
   fire() {
     this.animationFrames.forEach((f) => {
@@ -92,6 +102,8 @@ class Gaster {
 
     this.gasterBlast.push(new GasterBlast(this));
     this.gasterBlast[0].fx1.play();
+    this.velocity[(this.dir + 2) % 4] = 3;
+    this.acc = 1.1;
   }
 
   render(ctx) {
@@ -99,7 +111,7 @@ class Gaster {
     this.update();
     ctx.save();
     ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
-    ctx.rotate((Math.PI * (1 + this.dir)) / 2);
+    ctx.rotate(this.rotDeg);
     ctx.translate(-(this.x + this.width / 2), -(this.y + this.height / 2));
 
     if (this.frameToRender.length == 0) {

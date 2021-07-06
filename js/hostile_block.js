@@ -4,6 +4,7 @@ class HostileBlock {
     this.y = y;
     this.hbWidth = 0;
     this.hbHeight = 0;
+    this.readyToDestroy = false;
   }
 
   isColliding(player) {
