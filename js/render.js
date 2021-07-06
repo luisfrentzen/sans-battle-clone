@@ -23,7 +23,7 @@ function prepCanvas(canvas, width = 800, height = 600) {
 
   canvas.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0);
 
-  console.log(canvas.getContext("2d").canvas.width, canvas.width);
+  // console.log(canvas.getContext("2d").canvas.width, canvas.width);
 
   return canvas;
 }
@@ -129,6 +129,16 @@ var hostileAreas = [];
 var shakeFrames = [];
 var warningAreas = [];
 
+var targetTexture = {};
+var attackAnimationFrames = [];
+
+var attackTargetFrames = [];
+
+var uiActFrames = [];
+var uiFightFrames = [];
+var uiItemFrames = [];
+var uiMercyFrames = [];
+
 var bgMusic = {};
 var slamSound = {};
 var bonestabSound = {};
@@ -137,6 +147,35 @@ var warningSound = {};
 var gasterList = [];
 
 var inGame = false;
+
+var stringPool =
+  " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ{|}_";
+
+function renderBattleFont(x, y, ctx, str, scale = 2.5) {
+  let spritesheet = document.getElementById("battle-font");
+
+  let offset = 0;
+
+  [...str].forEach((c) => {
+    let idx = stringPool.indexOf(c.toUpperCase());
+    let x_mapped = idx % 16;
+    let y_mapped = Math.floor(idx / 16);
+
+    ctx.drawImage(
+      spritesheet,
+      6 * x_mapped,
+      6 * y_mapped,
+      6,
+      6,
+      x + offset,
+      y,
+      6 * scale,
+      6 * scale
+    );
+
+    offset += 5 * scale;
+  });
+}
 
 function initGame() {
   inGame = false;
@@ -149,6 +188,16 @@ function initGame() {
   slamSound = document.getElementById("slam-sound");
   bonestabSound = document.getElementById("bone-stab-sound");
   warningSound = document.getElementById("warning-sound");
+
+  uiActFrames = [...document.getElementsByClassName("act-ui")];
+  uiMercyFrames = [...document.getElementsByClassName("mercy-ui")];
+  uiFightFrames = [...document.getElementsByClassName("fight-ui")];
+  uiItemFrames = [...document.getElementsByClassName("item-ui")];
+
+  targetTexture = document.getElementById("target");
+
+  attackAnimationFrames = document.getElementById("attack-swipe");
+  attackTargetFrames = [...document.getElementsByClassName("attack-pointer")];
 
   actCanvWidth = parseInt(c.style.width, 10);
   actCanvHeight = parseInt(c.style.height, 10);
@@ -270,7 +319,21 @@ function render() {
   renderHostiles(ctx);
   maskArena();
   sans.render(ctx);
+  renderMisc(ctx);
   renderGasters(ctx);
+}
+
+function renderMisc(ctx) {
+  renderBattleFont(17.5, 372, ctx, "poni");
+  renderBattleFont(100, 372, ctx, "lv 26");
+
+  let gap = (560 - uiFightFrames[0].width * 4) / 3;
+  let offset = uiFightFrames[0].width + gap;
+
+  ctx.drawImage(uiFightFrames[0], 17.5, 400);
+  ctx.drawImage(uiActFrames[0], 17.5 + offset * 1, 400);
+  ctx.drawImage(uiItemFrames[0], 17.5 + offset * 2, 400);
+  ctx.drawImage(uiMercyFrames[0], 17.5 + offset * 3, 400);
 }
 
 function addShakeValues(val) {

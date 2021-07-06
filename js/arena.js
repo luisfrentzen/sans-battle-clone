@@ -40,7 +40,6 @@ class Arena {
 
     if (this.currentWidth != this.width) {
       this.currentWidth += this.xResizeValue;
-      console.log(this.currentWidth, this.width);
     }
 
     if (this.currentHeight != this.height) {
