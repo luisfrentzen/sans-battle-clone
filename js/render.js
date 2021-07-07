@@ -30,7 +30,7 @@ function prepCanvas(canvas, width = 800, height = 600) {
 const dirVector = [0, 0, 0, 0];
 
 function onKeyUp(e) {
-  var k = e.keyCode;
+  let k = e.keyCode;
   switch (k) {
     case 37:
       dirVector[1] = 0;
@@ -65,7 +65,7 @@ function onKeyUp(e) {
 }
 
 function onKeyDown(e) {
-  var k = e.keyCode;
+  let k = e.keyCode;
   switch (k) {
     case 37:
       if (!inMenu) {
@@ -115,24 +115,33 @@ function onKeyDown(e) {
       }
 
       break;
+    default:
+  }
+}
+
+function onKeyPress(e) {
+  let k = e.keyCode;
+  switch (k) {
     case 13:
       if (showDialog) {
+        console.log("dialog");
         menuSelectSound.pause();
         menuSelectSound.currentTime = 0;
         menuSelectSound.play();
         showDialog = false;
         dialogToRender.pop();
         playerAttack();
-      }
-      if (isPlayerAttacking) {
+      } else if (isPlayerAttacking) {
+        console.log("attack");
         playAttackAnimation();
       }
-    default:
+      break;
   }
 }
 
 window.addEventListener("keydown", onKeyDown, false);
 window.addEventListener("keyup", onKeyUp, false);
+window.addEventListener("keypress", onKeyPress);
 
 var arenaWidth = 0,
   arenaHeigth = 0;
@@ -155,7 +164,7 @@ var warningAreas = [];
 var targetTexture = {};
 var attackAnimationFrames = [];
 
-var attackTargetFrames = [];
+var attackPointerFrames = [];
 
 var isPlayerAttacking = false;
 
@@ -180,12 +189,26 @@ var showDialog = false;
 var dialogCharAt = 1;
 var dialogFx = {};
 
-var attackCursorPos = 0;
+var attackFx = {};
+
+var attackPointerPos = 20;
+var attackPointerVel = 6;
+var attackPointerState = 0;
+
+var isStriking = false;
+var strikeTimestamp = 0;
+var strikeCurrentFrame = 0;
+var strikeScale = 1.5;
+
+var now = 0;
+
+var showMissSign = false;
 
 var stringPool =
   " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
 function renderDamageFont(x, y, ctx, str, scale = 0.75) {
+  ctx.globalAlpha = 0.7;
   let spritesheet = document.getElementById("damage-font");
 
   let offset = 0;
@@ -209,6 +232,8 @@ function renderDamageFont(x, y, ctx, str, scale = 0.75) {
 
     offset += ("!\"'()1[]`iIj|".includes(c) ? 24 : 32) * scale;
   });
+
+  ctx.globalAlpha = 1;
 }
 
 function renderBasicFont(x, y, ctx, str, scale = 1.75) {
@@ -283,6 +308,7 @@ function initGame() {
   warningSound = document.getElementById("warning-sound");
   dialogFx = document.getElementById("battle-text-sound");
   menuSelectSound = document.getElementById("menu-select-sound");
+  attackFx = document.getElementById("player-strike-sound");
 
   uiActFrames = [...document.getElementsByClassName("act-ui")];
   uiMercyFrames = [...document.getElementsByClassName("mercy-ui")];
@@ -291,8 +317,8 @@ function initGame() {
 
   targetTexture = document.getElementById("target");
 
-  attackAnimationFrames = document.getElementById("attack-swipe");
-  attackTargetFrames = [...document.getElementsByClassName("attack-pointer")];
+  attackAnimationFrames = [...document.getElementsByClassName("attack-swipe")];
+  attackPointerFrames = [...document.getElementsByClassName("attack-pointer")];
 
   actCanvWidth = parseInt(c.style.width, 10);
   actCanvHeight = parseInt(c.style.height, 10);
@@ -306,6 +332,8 @@ function initGame() {
   arena = new Arena(arenaWidth, arenaHeigth);
 
   sans = new Sans(0, 0);
+  sans.x = actCanvWidth / 2 - sans.width / 2;
+  sans.y = arena.y - sans.height - 16;
 }
 
 function addVerticalBones(x, y, h, v) {
@@ -348,6 +376,17 @@ function hostileDestroyerFilter(arena) {
   };
 }
 
+function playAttackAnimation() {
+  attackPointerVel = 0;
+  attackPointerState = 1;
+
+  isStriking = true;
+  strikeTimestamp = now;
+  attackFx.currentTime = 0;
+  attackFx.play();
+  sans.dodge();
+}
+
 function destroyHostileObjects(arena) {
   hostileAreas = hostileAreas.filter(hostileDestroyerFilter(arena));
   gasterList = gasterList.filter(hostileDestroyerFilter(arena));
@@ -388,7 +427,8 @@ function checkCollideWithHostiles() {
   });
 }
 
-function gameLoop(now) {
+function gameLoop(n) {
+  now = n;
   clearFrame();
   render(now);
   checkCollideWithHostiles();
@@ -412,7 +452,7 @@ function render(now) {
   renderHostiles(ctx);
   maskArena();
   sans.render(ctx);
-  renderMisc(ctx);
+  renderMisc(ctx, now);
   renderGasters(ctx);
   renderDialog(ctx, now);
 }
@@ -440,17 +480,16 @@ function renderDialog(ctx, now) {
 
   if (
     dialogCharAt < dialogToRender[0].length &&
-    now - lastCharacterTime >= 35
+    now - lastCharacterTime >= 20
   ) {
     dialogCharAt++;
-    dialogFx.pause();
     dialogFx.currentTime = 0;
     dialogFx.play();
     lastCharacterTime = now;
   }
 }
 
-function renderMisc(ctx) {
+function renderMisc(ctx, now) {
   renderBattleFont(17.5, 372, ctx, "poni");
   renderBattleFont(100, 372, ctx, "lv 26");
 
@@ -484,6 +523,50 @@ function renderMisc(ctx) {
       arena.x + arena.currentWidth / 2 - targetTexture.width / 2,
       arena.y + arena.currentHeight / 2 - targetTexture.height / 2
     );
+
+    ctx.drawImage(
+      attackPointerFrames[
+        attackPointerState == 0 ? 0 : Math.floor(now / 100) % 2
+      ],
+      attackPointerPos,
+      arena.y + arena.currentHeight / 2 - attackPointerFrames[0].height / 2
+    );
+
+    attackPointerPos += attackPointerVel;
+
+    if (attackPointerPos > 565) {
+      isPlayerAttacking = false;
+    }
+  }
+
+  if (isStriking) {
+    if (strikeCurrentFrame > 5) {
+      showMissSign = true;
+      isStriking = false;
+      strikeCurrentFrame = 0;
+
+      setTimeout(() => {
+        showMissSign = false;
+        isPlayerAttacking = false;
+      }, 1300);
+    }
+
+    ctx.drawImage(
+      attackAnimationFrames[strikeCurrentFrame],
+      actCanvWidth / 2 - attackAnimationFrames[0].width / 2,
+      actCanvHeight / 4,
+      attackAnimationFrames[strikeCurrentFrame].width * strikeScale,
+      attackAnimationFrames[strikeCurrentFrame].height * strikeScale
+    );
+
+    if (now - strikeTimestamp > 100) {
+      strikeTimestamp = now;
+      strikeCurrentFrame++;
+    }
+  }
+
+  if (showMissSign) {
+    renderDamageFont(actCanvWidth / 2, 30, ctx, "MISS");
   }
 }
 

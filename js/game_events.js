@@ -95,7 +95,9 @@ var dialogues = [
   "Reading this doesn't seem like^the best use of your time.",
 ];
 
-function dialogMenu() {
+function showDialogMenu() {
+  attackPointerPos = 20;
+  attackPointerVel = 6;
   p.display = false;
   arena.resizeToLayout(3);
   setTimeout(() => {

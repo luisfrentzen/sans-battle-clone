@@ -59,8 +59,23 @@ class Sans {
     this.animationClock = 0;
     this.frameToRender = [];
 
+    this.velocity = [0, 0, 0, 0];
+
     this.headAnimationX = 0;
     this.headAnimationY = 0;
+  }
+
+  dodge() {
+    this.velocity[1] = 5;
+    setTimeout(() => {
+      this.velocity[1] = 0;
+      setTimeout(() => {
+        this.velocity[1] = -5;
+        setTimeout(() => {
+          this.velocity[1] = 0;
+        }, 300);
+      }, 1000);
+    }, 300);
   }
 
   playAnimation(frames) {
@@ -77,8 +92,10 @@ class Sans {
   }
 
   update() {
-    this.x = actCanvWidth / 2 - this.width / 2;
     this.y = arena.y - this.height - 16;
+
+    this.x += this.velocity[3] - this.velocity[1];
+    this.y += this.velocity[0] - this.velocity[2];
 
     if (this.isMoving) {
       this.bodyMovementX += this.bodyMoveSpeedX;
