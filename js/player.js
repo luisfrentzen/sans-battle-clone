@@ -28,6 +28,13 @@ class Player {
     this.isSlammed = false;
     this.isGrounded = [false, false, false, false];
 
+    this.display = true;
+
+    this.maxHp = 100;
+    this.curHp = 100;
+    this.curKr = 0;
+    this.maxKr = 40;
+
     //0 normal down
     //1 left
     //2 upside down
@@ -58,6 +65,8 @@ class Player {
   }
 
   render(ctx, arena) {
+    if (!this.display) return;
+
     ctx.save();
     this.x += this.velocity[3] - this.velocity[1];
     this.y += this.velocity[0] - this.velocity[2];
@@ -134,20 +143,28 @@ class Player {
       // }
     }
 
+    let trueX = this.x;
+    let trueY = this.y;
+
+    if (inMenu) {
+      trueX = 17.5 + 150 * activeMenu;
+      trueY = 400;
+    }
+
     ctx.translate(
-      this.x + this.boundingBoxWidth / 2,
-      this.y + this.boundingBoxHeight / 2
+      trueX + this.boundingBoxWidth / 2,
+      trueY + this.boundingBoxHeight / 2
     );
     ctx.rotate((Math.PI * (1 + this.orientation)) / 2);
     ctx.translate(
-      -(this.x + this.boundingBoxWidth / 2),
-      -(this.y + this.boundingBoxHeight / 2)
+      -(trueX + this.boundingBoxWidth / 2),
+      -(trueY + this.boundingBoxHeight / 2)
     );
 
     ctx.drawImage(
       this.texture,
-      this.x,
-      this.y,
+      trueX,
+      trueY,
       this.boundingBoxWidth,
       this.boundingBoxHeight
     );
@@ -155,12 +172,7 @@ class Player {
     ctx.globalCompositeOperation = "source-in";
 
     ctx.fillStyle = this.color;
-    ctx.fillRect(
-      this.x,
-      this.y,
-      this.x + this.boundingBoxWidth,
-      this.y + this.boundingBoxHeight
-    );
+    ctx.fillRect(trueX, trueY, this.boundingBoxWidth, this.boundingBoxHeight);
     ctx.globalCompositeOperation = "source-over";
     ctx.restore();
   }

@@ -1,7 +1,7 @@
 window.onload = main;
 
 const SHAKE_LENGTH = 8;
-const DEFAULT_WARNING_H = 50;
+const DEFAULT_WARNING_H = 30;
 
 const red = "#c70021";
 const blue = "#2000bf";
@@ -24,7 +24,6 @@ function prepCanvas(canvas, width = 800, height = 600) {
   canvas.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0);
 
   // console.log(canvas.getContext("2d").canvas.width, canvas.width);
-
   return canvas;
 }
 
@@ -69,41 +68,65 @@ function onKeyDown(e) {
   var k = e.keyCode;
   switch (k) {
     case 37:
-      if (p.orientation == 3 && p.mode == 1) {
-        p.jump();
+      if (!inMenu) {
+        if (p.orientation == 3 && p.mode == 1) {
+          p.jump();
+        } else {
+          dirVector[1] = 1;
+          p.move(dirVector);
+        }
       } else {
-        dirVector[1] = 1;
-        p.move(dirVector);
+        activeMenu = activeMenu - 1 < 0 ? 0 : activeMenu - 1;
       }
 
       break;
     case 39:
-      if (p.orientation == 1 && p.mode == 1) {
-        p.jump();
+      if (!inMenu) {
+        if (p.orientation == 1 && p.mode == 1) {
+          p.jump();
+        } else {
+          dirVector[3] = 1;
+          p.move(dirVector);
+        }
       } else {
-        dirVector[3] = 1;
-        p.move(dirVector);
+        activeMenu = activeMenu + 1 > 3 ? 3 : activeMenu + 1;
       }
 
       break;
     case 38:
-      if (p.orientation == 0 && p.mode == 1) {
-        p.jump();
-      } else {
-        dirVector[2] = 1;
-        p.move(dirVector);
+      if (!inMenu) {
+        if (p.orientation == 0 && p.mode == 1) {
+          p.jump();
+        } else {
+          dirVector[2] = 1;
+          p.move(dirVector);
+        }
       }
 
       break;
     case 40:
-      if (p.orientation == 2 && p.mode == 1) {
-        p.jump();
-      } else {
-        dirVector[0] = 1;
-        p.move(dirVector);
+      if (!inMenu) {
+        if (p.orientation == 2 && p.mode == 1) {
+          p.jump();
+        } else {
+          dirVector[0] = 1;
+          p.move(dirVector);
+        }
       }
 
       break;
+    case 13:
+      if (showDialog) {
+        menuSelectSound.pause();
+        menuSelectSound.currentTime = 0;
+        menuSelectSound.play();
+        showDialog = false;
+        dialogToRender.pop();
+        playerAttack();
+      }
+      if (isPlayerAttacking) {
+        playAttackAnimation();
+      }
     default:
   }
 }
@@ -134,6 +157,8 @@ var attackAnimationFrames = [];
 
 var attackTargetFrames = [];
 
+var isPlayerAttacking = false;
+
 var uiActFrames = [];
 var uiFightFrames = [];
 var uiItemFrames = [];
@@ -143,13 +168,81 @@ var bgMusic = {};
 var slamSound = {};
 var bonestabSound = {};
 var warningSound = {};
+var menuSelectSound = {};
 
 var gasterList = [];
 
 var inGame = false;
 
+var inMenu = false;
+var activeMenu = 0;
+var showDialog = false;
+var dialogCharAt = 1;
+var dialogFx = {};
+
+var attackCursorPos = 0;
+
 var stringPool =
-  " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ{|}_";
+  " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+
+function renderDamageFont(x, y, ctx, str, scale = 0.75) {
+  let spritesheet = document.getElementById("damage-font");
+
+  let offset = 0;
+
+  [...str].forEach((c, i) => {
+    let idx = stringPool.indexOf(c);
+    let x_mapped = idx % 16;
+    let y_mapped = Math.floor(idx / 16);
+
+    ctx.drawImage(
+      spritesheet,
+      33 * x_mapped,
+      32 * y_mapped,
+      33,
+      32,
+      x + offset,
+      y,
+      33 * scale,
+      32 * scale
+    );
+
+    offset += ("!\"'()1[]`iIj|".includes(c) ? 24 : 32) * scale;
+  });
+}
+
+function renderBasicFont(x, y, ctx, str, scale = 1.75) {
+  let spritesheet = document.getElementById("basic-font");
+
+  let offset = 0;
+  let enter = 0;
+
+  [...str].forEach((c) => {
+    if (c == "^") {
+      enter += 16 * scale;
+      offset = 0;
+      return;
+    }
+
+    let idx = stringPool.indexOf(c);
+    let x_mapped = idx % 16;
+    let y_mapped = Math.floor(idx / 16);
+
+    ctx.drawImage(
+      spritesheet,
+      10 * x_mapped,
+      16 * y_mapped,
+      10,
+      16,
+      x + offset,
+      y + enter,
+      10 * scale,
+      16 * scale
+    );
+
+    offset += 8 * scale;
+  });
+}
 
 function renderBattleFont(x, y, ctx, str, scale = 2.5) {
   let spritesheet = document.getElementById("battle-font");
@@ -188,6 +281,8 @@ function initGame() {
   slamSound = document.getElementById("slam-sound");
   bonestabSound = document.getElementById("bone-stab-sound");
   warningSound = document.getElementById("warning-sound");
+  dialogFx = document.getElementById("battle-text-sound");
+  menuSelectSound = document.getElementById("menu-select-sound");
 
   uiActFrames = [...document.getElementsByClassName("act-ui")];
   uiMercyFrames = [...document.getElementsByClassName("mercy-ui")];
@@ -211,8 +306,6 @@ function initGame() {
   arena = new Arena(arenaWidth, arenaHeigth);
 
   sans = new Sans(0, 0);
-  sans.x = actCanvWidth / 2 - sans.width / 2;
-  sans.y = arena.y - arena.currentHeight - 8;
 }
 
 function addVerticalBones(x, y, h, v) {
@@ -297,13 +390,13 @@ function checkCollideWithHostiles() {
 
 function gameLoop(now) {
   clearFrame();
-  render();
+  render(now);
   checkCollideWithHostiles();
   destroyHostileObjects(arena);
   requestAnimationFrame(gameLoop);
 }
 
-function render() {
+function render(now) {
   ctx.imageSmoothingEnabled = false;
 
   if (shakeFrames.length != 0) {
@@ -321,6 +414,40 @@ function render() {
   sans.render(ctx);
   renderMisc(ctx);
   renderGasters(ctx);
+  renderDialog(ctx, now);
+}
+
+var dialogToRender = [];
+var lastCharacterTime = 0;
+
+function addDialog(str) {
+  showDialog = true;
+  dialogCharAt = 0;
+  dialogToRender.unshift(str);
+}
+
+function renderDialog(ctx, now) {
+  if (!showDialog) return;
+  renderBasicFont(arena.x + 15, arena.y + 15, ctx, "*", 1.75);
+
+  renderBasicFont(
+    arena.x + 45,
+    arena.y + 15,
+    ctx,
+    dialogToRender[0].slice(0, dialogCharAt),
+    1.75
+  );
+
+  if (
+    dialogCharAt < dialogToRender[0].length &&
+    now - lastCharacterTime >= 35
+  ) {
+    dialogCharAt++;
+    dialogFx.pause();
+    dialogFx.currentTime = 0;
+    dialogFx.play();
+    lastCharacterTime = now;
+  }
 }
 
 function renderMisc(ctx) {
@@ -330,10 +457,34 @@ function renderMisc(ctx) {
   let gap = (560 - uiFightFrames[0].width * 4) / 3;
   let offset = uiFightFrames[0].width + gap;
 
-  ctx.drawImage(uiFightFrames[0], 17.5, 400);
-  ctx.drawImage(uiActFrames[0], 17.5 + offset * 1, 400);
-  ctx.drawImage(uiItemFrames[0], 17.5 + offset * 2, 400);
-  ctx.drawImage(uiMercyFrames[0], 17.5 + offset * 3, 400);
+  ctx.drawImage(
+    inMenu && activeMenu == 0 ? uiFightFrames[1] : uiFightFrames[0],
+    17.5,
+    400
+  );
+  ctx.drawImage(
+    inMenu && activeMenu == 1 ? uiActFrames[1] : uiActFrames[0],
+    17.5 + offset * 1,
+    400
+  );
+  ctx.drawImage(
+    inMenu && activeMenu == 2 ? uiItemFrames[1] : uiItemFrames[0],
+    17.5 + offset * 2,
+    400
+  );
+  ctx.drawImage(
+    inMenu && activeMenu == 3 ? uiMercyFrames[1] : uiMercyFrames[0],
+    17.5 + offset * 3,
+    400
+  );
+
+  if (isPlayerAttacking) {
+    ctx.drawImage(
+      targetTexture,
+      arena.x + arena.currentWidth / 2 - targetTexture.width / 2,
+      arena.y + arena.currentHeight / 2 - targetTexture.height / 2
+    );
+  }
 }
 
 function addShakeValues(val) {
@@ -353,7 +504,12 @@ function maskArena() {
     arena.currentWidth + arena.borderWidth,
     -(arena.currentHeight + arena.borderWidth)
   );
-  ctx.rect(actCanvWidth, actCanvHeight, -actCanvWidth, -actCanvHeight);
+  ctx.rect(
+    actCanvWidth,
+    actCanvHeight - (inMenu ? 50 : 0),
+    -actCanvWidth,
+    -actCanvHeight + (inMenu ? 50 : 0)
+  );
   ctx.fillStyle = "black";
   ctx.fill();
   ctx.closePath();

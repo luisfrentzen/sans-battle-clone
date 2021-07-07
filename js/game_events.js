@@ -69,7 +69,7 @@ function boneStab(dir) {
       dir == 0 ? arena.y + arena.currentHeight + 20 : arena.y - 85,
       12,
       12,
-      dir == 0 ? -80 : 40,
+      dir == 0 ? -60 : 25,
       undefined,
       dir == 0 ? -10 : 10
     );
@@ -79,9 +79,30 @@ function boneStab(dir) {
       arena.y + 5,
       12,
       12,
-      dir == 3 ? -80 : 40,
+      dir == 3 ? -60 : 25,
       undefined,
       dir == 3 ? -10 : 10
     );
   }
+}
+
+var dialogues = [
+  "You felt your sins crawling^on your back.",
+  "You feel like you're going to^have a bad time.",
+  "You felt your sins weighing^on your neck.",
+  "Sans is preparing something.",
+  "Just keep attacking.",
+  "Reading this doesn't seem like^the best use of your time.",
+];
+
+function dialogMenu() {
+  p.display = false;
+  arena.resizeToLayout(3);
+  setTimeout(() => {
+    addDialog(dialogues[Math.floor(Math.random() * 6)]);
+  }, 500);
+}
+
+function playerAttack() {
+  isPlayerAttacking = true;
 }

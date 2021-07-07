@@ -53,7 +53,7 @@ class Sans {
     this.headMovementX = 0;
     this.headMovementY = 0.04;
     this.headMoveSpeedX = 0.019 * this.scale;
-    this.headMoveSpeedY = 0.0225 * this.scale;
+    this.headMoveSpeedY = 0.05 * this.scale;
     this.isMoving = true;
 
     this.animationClock = 0;
@@ -70,7 +70,16 @@ class Sans {
     });
   }
 
+  resetAnimation() {
+    while (this.frameToRender.length > 0) {
+      this.frameToRender.pop();
+    }
+  }
+
   update() {
+    this.x = actCanvWidth / 2 - this.width / 2;
+    this.y = arena.y - this.height - 16;
+
     if (this.isMoving) {
       this.bodyMovementX += this.bodyMoveSpeedX;
       this.bodyMovementY += this.bodyMoveSpeedY;
@@ -88,7 +97,7 @@ class Sans {
       if (this.headMovementX > 0.63 * this.scale || this.headMovementX < 0) {
         this.headMoveSpeedX *= -1;
       }
-      if (this.headMovementY < -0.3 * this.scale || this.headMovementY > 0.04) {
+      if (this.headMovementY < -0.3 * this.scale || this.headMovementY > 0) {
         this.headMoveSpeedY *= -1;
       }
     }

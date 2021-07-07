@@ -31,6 +31,20 @@ class Arena {
     this.height = height;
   }
 
+  resizeToLayout(layout) {
+    switch (layout) {
+      case 1:
+        this.resize(150, 150);
+        break;
+      case 2:
+        this.resize(450, 130);
+        break;
+      case 3:
+        this.resize(560, 130);
+        break;
+    }
+  }
+
   render(ctx) {
     var x = parseInt(ctx.canvas.style.width, 10) / 2 - this.currentWidth / 2;
     var y = parseInt(ctx.canvas.style.height, 10) * (4 / 5);
