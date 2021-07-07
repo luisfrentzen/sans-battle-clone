@@ -60,7 +60,8 @@ function onKeyUp(e) {
 
   if (p.isJumping) {
     p.isJumping = false;
-    p.velocity[p.orientation] = 0;
+    p.velocity[p.orientation] =
+      p.velocity[p.orientation] < 0 ? 0 : p.velocity[p.orientation];
   }
 }
 

@@ -37,7 +37,7 @@ class Arena {
         this.resize(150, 150);
         break;
       case 2:
-        this.resize(450, 130);
+        this.resize(380, 130);
         break;
       case 3:
         this.resize(560, 130);

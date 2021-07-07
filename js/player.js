@@ -48,6 +48,14 @@ class Player {
     this.color = this.mode == 0 ? "#c70021" : "#2000bf";
   }
 
+  setDefaultPosition() {
+    this.x = arena.x + arena.currentWidth / 2 - this.boundingBoxWidth / 2;
+    this.y =
+      this.mode == 0
+        ? arena.y + arena.currentHeight / 2 - this.boundingBoxHeight / 2
+        : arena.y + arena.currentHeight - this.boundingBoxHeight;
+  }
+
   move(dirVector) {
     for (let i = 0; i < 4; i++) {
       if (i % 2 == this.orientation % 2 && this.mode == 1) {
