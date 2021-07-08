@@ -1,6 +1,6 @@
 function boneGap1() {
-  p.setDefaultPosition();
   p.changeMode(1);
+  p.setDefaultPosition();
   arena.resizeToLayout(2);
 
   setTimeout(() => {
@@ -31,8 +31,8 @@ function boneGap1() {
 }
 
 function boneGap2() {
-  p.setDefaultPosition();
   p.changeMode(1);
+  p.setDefaultPosition();
   arena.resizeToLayout(2);
 
   setTimeout(() => {
@@ -60,6 +60,26 @@ function boneGap2() {
           -3
         );
       }, i * 1000);
+    }
+  }, 1000);
+}
+
+function boneStabs() {
+  p.changeMode(0);
+  p.setDefaultPosition();
+  arena.resizeToLayout(1);
+
+  setTimeout(() => {
+    for (let i = 0; i < 8; i++) {
+      let dir = Math.floor(Math.random() * 3);
+      setTimeout(() => {
+        slamPlayer(dir);
+        if (i == 7) {
+          setTimeout(() => {
+            sans.resetAnimation();
+          }, 1500);
+        }
+      }, i * 1200);
     }
   }, 1000);
 }

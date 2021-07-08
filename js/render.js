@@ -589,10 +589,10 @@ function maskArena() {
     -(arena.currentHeight + arena.borderWidth)
   );
   ctx.rect(
-    actCanvWidth,
-    actCanvHeight - (inMenu ? 50 : 0),
-    -actCanvWidth,
-    -actCanvHeight + (inMenu ? 50 : 0)
+    actCanvWidth + 100,
+    actCanvHeight + 100,
+    -actCanvWidth - 200,
+    -actCanvHeight - 200
   );
   ctx.fillStyle = "black";
   ctx.fill();

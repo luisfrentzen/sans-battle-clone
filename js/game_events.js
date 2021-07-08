@@ -45,12 +45,14 @@ function playerSlammedEffect(ctx, dir, frameCount) {
 
   ctx.save();
   addShakeValues(shakeValues);
+  slamSound.currentTime = 0;
   slamSound.play();
 }
 
 function warnBoneStab(ctx, dir) {
   addWarningAreas(arena, dir, DEFAULT_WARNING_H);
   let fx = document.getElementById("warning-sound");
+  fx.currentTime = 0;
   fx.play();
 
   setTimeout(() => {
