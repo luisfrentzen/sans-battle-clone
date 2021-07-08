@@ -97,13 +97,15 @@ var dialogues = [
   "Reading this doesn't seem like^the best use of your time.",
 ];
 
-function showDialogMenu() {
+function showDialogMenu(dialog = -1) {
   attackPointerPos = 20;
   attackPointerVel = 6;
   p.display = false;
   arena.resizeToLayout(3);
+
   setTimeout(() => {
-    addDialog(dialogues[Math.floor(Math.random() * 6)]);
+    addDialog(dialogues[dialog == -1 ? Math.floor(Math.random() * 6) : dialog]);
+    showDialog = true;
   }, 500);
 }
 

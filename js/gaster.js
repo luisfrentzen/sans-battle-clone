@@ -5,8 +5,12 @@ class Gaster {
 
     let phX = 0;
     let phY = 0;
-    phX = arena.currentWidth / 2 + Math.round(Math.random() * 100);
-    phY = arena.currentHeight / 2 + Math.round(Math.random() * 100);
+    phX =
+      arena.currentWidth / 2 +
+      Math.floor(Math.random() * (1 + 150 - 100) + 100);
+    phY =
+      arena.currentHeight / 2 +
+      Math.floor(Math.random() * (1 + 150 - 100) + 100);
 
     if (
       this.targetX < arena.x + arena.currentWidth / 2 &&
@@ -31,6 +35,8 @@ class Gaster {
       phY = this.targetY + phY;
     }
 
+    this.arrivedTimestamp = -1;
+
     this.acc = 1;
 
     this.x = phX;
@@ -51,7 +57,7 @@ class Gaster {
     this.animationClock = 0;
     this.animationSpeed = 3;
 
-    this.nIntroFrame = 10;
+    this.nIntroFrame = 12;
 
     let velX = (this.targetX - this.x) / this.nIntroFrame;
     let velY = (this.targetY - this.y) / this.nIntroFrame;
@@ -63,18 +69,17 @@ class Gaster {
       velX > 0 ? velX : 0,
     ];
 
-    this.rotDeg = 0;
     this.targetRotDeg = (Math.PI * (1 + this.dir)) / 2;
+    this.rotDeg = this.targetRotDeg - Math.PI / 2;
 
-    this.rotVel = this.targetRotDeg / this.nIntroFrame;
-
+    this.rotVel = Math.PI / 2 / this.nIntroFrame;
     this.fx = document.getElementById("gaster-blaster-sound");
 
-    console.log(this.velocity);
+    this.fx.currentTime = 0;
     this.fx.play();
   }
 
-  update() {
+  update(now) {
     this.y += this.velocity[0] *= this.acc;
     this.y -= Math.abs((this.velocity[2] *= this.acc));
     this.x -= Math.abs((this.velocity[1] *= this.acc));
@@ -82,16 +87,13 @@ class Gaster {
 
     this.rotDeg += this.rotVel;
 
-    if (
-      Math.round(this.x) == this.targetX &&
-      Math.round(this.y) == this.targetY
-    ) {
-      this.velocity = [0, 0, 0, 0];
-    }
-
     if (this.rotDeg > this.targetRotDeg) {
       this.rotDeg = this.targetRotDeg;
       this.rotVel = 0;
+      this.velocity = [0, 0, 0, 0];
+      this.arrivedTimestamp = now;
+      this.x = this.targetX;
+      this.y = this.targetY;
     }
   }
 
@@ -101,14 +103,23 @@ class Gaster {
     });
 
     this.gasterBlast.push(new GasterBlast(this));
+    this.gasterBlast[0].fx1.currentTime = 0;
     this.gasterBlast[0].fx1.play();
     this.velocity[(this.dir + 2) % 4] = 3;
     this.acc = 1.1;
+
+    let shakeValues = [];
+    ctx.save();
+    for (let i = 0; i < 2; i++) {
+      let dx = Math.random() * 6 - 3;
+      let dy = Math.random() * 6 - 3;
+      shakeValues.push([dx, dy]);
+    }
+    addShakeValues(shakeValues);
   }
 
-  render(ctx) {
-    // console.log(this.x, this.y);
-    this.update();
+  render(ctx, now) {
+    this.update(now);
     ctx.save();
     ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
     ctx.rotate(this.rotDeg);

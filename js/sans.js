@@ -55,6 +55,7 @@ class Sans {
     this.headMoveSpeedX = 0.019 * this.scale;
     this.headMoveSpeedY = 0.05 * this.scale;
     this.isMoving = true;
+    this.isDodging = false;
 
     this.animationClock = 0;
     this.frameToRender = [];
@@ -67,12 +68,14 @@ class Sans {
 
   dodge() {
     this.velocity[1] = 5;
+    this.isDodging = true;
     setTimeout(() => {
       this.velocity[1] = 0;
       setTimeout(() => {
         this.velocity[1] = -5;
         setTimeout(() => {
           this.velocity[1] = 0;
+          this.isDodging = false;
         }, 300);
       }, 1000);
     }, 300);
@@ -93,6 +96,9 @@ class Sans {
 
   update() {
     this.y = arena.y - this.height - 16;
+    if (!this.isDodging) {
+      this.x = actCanvWidth / 2 - this.width / 2;
+    }
 
     this.x += this.velocity[3] - this.velocity[1];
     this.y += this.velocity[0] - this.velocity[2];

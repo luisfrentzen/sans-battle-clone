@@ -23,7 +23,6 @@ function prepCanvas(canvas, width = 800, height = 600) {
 
   canvas.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0);
 
-  // console.log(canvas.getContext("2d").canvas.width, canvas.width);
   return canvas;
 }
 
@@ -51,8 +50,15 @@ function onKeyUp(e) {
     case 32:
       if (!inGame) {
         inGame = true;
-        bgMusic.play();
-        requestAnimationFrame(gameLoop);
+        let fx = document.getElementById("flash-sound");
+        fx.curentTime = 0;
+        fx.play();
+        lastEvent = now;
+        setTimeout(() => {
+          fx.curentTime = 0;
+          fx.play();
+          intro();
+        }, 190);
       }
       break;
     default:
@@ -125,16 +131,23 @@ function onKeyPress(e) {
   switch (k) {
     case 13:
       if (showDialog) {
-        console.log("dialog");
         menuSelectSound.pause();
         menuSelectSound.currentTime = 0;
         menuSelectSound.play();
         showDialog = false;
         dialogToRender.pop();
+        if (bgMusic.currentTime == 0) {
+          bgMusic.play();
+          bgMusic.loop = true;
+        }
         playerAttack();
       } else if (isPlayerAttacking) {
-        console.log("attack");
         playAttackAnimation();
+        setTimeout(() => {
+          lastEvent = now;
+          currentEvent++;
+          onDialog = false;
+        }, 1500);
       }
       break;
   }
@@ -190,6 +203,8 @@ var showDialog = false;
 var dialogCharAt = 1;
 var dialogFx = {};
 
+var damagedSound = {};
+
 var attackFx = {};
 
 var attackPointerPos = 20;
@@ -201,9 +216,15 @@ var strikeTimestamp = 0;
 var strikeCurrentFrame = 0;
 var strikeScale = 1.5;
 
+var lastEvent = 0;
+
 var now = 0;
+var onEvent = false;
+var onDialog = false;
 
 var showMissSign = false;
+
+var currentEvent = 0;
 
 var stringPool =
   " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
@@ -214,7 +235,7 @@ function renderDamageFont(x, y, ctx, str, scale = 0.75) {
 
   let offset = 0;
 
-  [...str].forEach((c, i) => {
+  [...str].forEach((c) => {
     let idx = stringPool.indexOf(c);
     let x_mapped = idx % 16;
     let y_mapped = Math.floor(idx / 16);
@@ -299,6 +320,9 @@ function renderBattleFont(x, y, ctx, str, scale = 2.5) {
 function initGame() {
   inGame = false;
 
+  onEvent = false;
+  onDialog = false;
+
   dpr = Math.ceil(window.devicePixelRatio);
   c = prepCanvas(document.getElementById("canv"), 600, 450);
   ctx = c.getContext("2d");
@@ -310,6 +334,7 @@ function initGame() {
   dialogFx = document.getElementById("battle-text-sound");
   menuSelectSound = document.getElementById("menu-select-sound");
   attackFx = document.getElementById("player-strike-sound");
+  damagedSound = document.getElementById("damaged-sound");
 
   uiActFrames = [...document.getElementsByClassName("act-ui")];
   uiMercyFrames = [...document.getElementsByClassName("mercy-ui")];
@@ -351,6 +376,10 @@ function addHorizontalBoneStreak(x, y, w, n, bound, hold = 30, v = 10) {
 
 function addVerticallBoneStreak(x, y, h, n, bound, hold = 30, v = 10) {
   hostileAreas.push(new VerticalBoneStreak(x, y, h, v, n, bound, hold));
+}
+
+function addGasterBlast(x, y, dir, scale, arena) {
+  gasterList.unshift(new Gaster(x, y, dir, scale, arena));
 }
 
 function addWarningAreas(arena, dir, h) {
@@ -399,9 +428,9 @@ function renderHostiles(ctx) {
   });
 }
 
-function renderGasters(ctx) {
+function renderGasters(ctx, now) {
   gasterList.forEach((gaster) => {
-    gaster.render(ctx);
+    gaster.render(ctx, now);
   });
 }
 
@@ -414,6 +443,9 @@ function renderWarnings(ctx) {
 function checkCollideWithHostiles() {
   hostileAreas.forEach((hostiles) => {
     if (hostiles.isColliding(p)) {
+      let fx = damagedSound.cloneNode(true);
+      fx.volume = 0.2;
+      fx.play();
       return;
     }
   });
@@ -421,7 +453,9 @@ function checkCollideWithHostiles() {
   gasterList.forEach((gaster) => {
     if (gaster.gasterBlast.length > 0) {
       if (gaster.gasterBlast[0].isColliding(p)) {
-        console.count("collide");
+        let fx = damagedSound.cloneNode(true);
+        fx.volume = 0.2;
+        fx.play();
         return;
       }
     }
@@ -432,37 +466,69 @@ function gameLoop(n) {
   now = n;
   clearFrame();
   render(now);
+  update(now);
   checkCollideWithHostiles();
   destroyHostileObjects(arena);
   requestAnimationFrame(gameLoop);
 }
 
+function update(now) {
+  console.log(!onEvent && now - lastEvent > 2000);
+  if (!onDialog && !isPlayerAttacking && inGame) {
+    if (!onEvent && now - lastEvent > 2000) {
+      switch (currentEvent % 2) {
+        case 0:
+          console.log("dialog");
+          onDialog = true;
+          showDialogMenu(lastEvent == 0 ? 1 : undefined);
+          break;
+        case 1:
+          console.log("attack");
+          p.display = true;
+          attacks[Math.floor(Math.random() * 5)]();
+          currentEvent++;
+          break;
+        default:
+          console.log(currentEvent % 2);
+      }
+    }
+  }
+}
+
 function render(now) {
   ctx.imageSmoothingEnabled = false;
+  if (!inGame) {
+    renderBasicFont(
+      actCanvWidth / 2 - 140,
+      actCanvHeight / 2 - 28,
+      ctx,
+      "PRESS SPACE TO START"
+    );
+  } else {
+    if (shakeFrames.length != 0) {
+      ctx.translate(shakeFrames[0][0], shakeFrames[0][1]);
+      shakeFrames.shift();
 
-  if (shakeFrames.length != 0) {
-    ctx.translate(shakeFrames[0][0], shakeFrames[0][1]);
-    shakeFrames.shift();
+      if (shakeFrames.length == 0) ctx.restore();
+    }
+    console.log(p.x, p.y);
 
-    if (shakeFrames.length == 0) ctx.restore();
+    p.render(ctx, arena);
+    arena.render(ctx);
+    renderWarnings(ctx);
+    renderHostiles(ctx);
+    maskArena();
+    sans.render(ctx);
+    renderMisc(ctx, now);
+    renderGasters(ctx, now);
+    renderDialog(ctx, now);
   }
-
-  p.render(ctx, arena);
-  arena.render(ctx);
-  renderWarnings(ctx);
-  renderHostiles(ctx);
-  maskArena();
-  sans.render(ctx);
-  renderMisc(ctx, now);
-  renderGasters(ctx);
-  renderDialog(ctx, now);
 }
 
 var dialogToRender = [];
 var lastCharacterTime = 0;
 
 function addDialog(str) {
-  showDialog = true;
   dialogCharAt = 0;
   dialogToRender.unshift(str);
 }
@@ -535,8 +601,15 @@ function renderMisc(ctx, now) {
 
     attackPointerPos += attackPointerVel;
 
-    if (attackPointerPos > 565) {
+    if (attackPointerPos > arena.x + arena.currentWidth) {
+      showMissSign = true;
       isPlayerAttacking = false;
+      lastEvent = now;
+      onDialog = false;
+      currentEvent++;
+      setTimeout(() => {
+        showMissSign = false;
+      }, 1300);
     }
   }
 
@@ -549,6 +622,7 @@ function renderMisc(ctx, now) {
       setTimeout(() => {
         showMissSign = false;
         isPlayerAttacking = false;
+        lastEvent = now;
       }, 1300);
     }
 

@@ -49,11 +49,18 @@ class Player {
   }
 
   setDefaultPosition() {
-    this.x = arena.x + arena.currentWidth / 2 - this.boundingBoxWidth / 2;
-    this.y =
-      this.mode == 0
-        ? arena.y + arena.currentHeight / 2 - this.boundingBoxHeight / 2
-        : arena.y + arena.currentHeight - this.boundingBoxHeight;
+    let x = actCanvWidth / 2 - p.boundingBoxWidth / 2;
+    let y = actCanvHeight * (4 / 5) - arena.height / 2;
+
+    this.grav = this.normGrav;
+    this.isSlammed = false;
+    this.x = x;
+    this.isGrounded = [this.mode == 0 ? false : true, false, false, false];
+    this.y = this.mode == 0 ? y - p.boundingBoxHeight : y + arena.width / 2 - 3;
+    this.velocity = [0, 0, 0, 0];
+    this.isJumping = false;
+    this.orientation = 0;
+    console.log(this.x, this.y);
   }
 
   move(dirVector) {
@@ -80,9 +87,11 @@ class Player {
     this.y += this.velocity[0] - this.velocity[2];
 
     let leftBorder = arena.x + arena.borderWidth;
-    let rightBorder = arena.x + arena.width - arena.borderWidth;
+    let rightBorder = arena.x + arena.currentWidth - arena.borderWidth;
     let upperBound = arena.y + arena.borderWidth;
-    let lowerBound = arena.y + arena.height - arena.borderWidth;
+    let lowerBound = arena.y + arena.currentHeight - arena.borderWidth;
+
+    console.log({ leftBorder, rightBorder, upperBound, lowerBound });
 
     if (this.x <= leftBorder) {
       this.x = leftBorder;
