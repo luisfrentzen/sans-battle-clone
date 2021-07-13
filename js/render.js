@@ -5,6 +5,8 @@ const DEFAULT_WARNING_H = 30;
 
 const red = "#c70021";
 const blue = "#2000bf";
+const purple = "#ff17f3";
+const yellow = "#fff700";
 
 function zip(arrays) {
   return arrays[0].map(function (_, i) {
@@ -51,14 +53,14 @@ function onKeyUp(e) {
       if (!inGame) {
         inGame = true;
         let fx = document.getElementById("flash-sound");
-        fx.curentTime = 0;
-        fx.play();
+        let f = fx.cloneNode(true);
+        f.play();
         lastEvent = now;
         setTimeout(() => {
-          fx.curentTime = 0;
-          fx.play();
+          let f2 = fx.cloneNode(true);
+          f2.play();
           intro();
-        }, 190);
+        }, 150);
       }
       break;
     default:
@@ -140,9 +142,14 @@ function onKeyPress(e) {
           bgMusic.play();
           bgMusic.loop = true;
         }
+        hasAttacked = false;
         playerAttack();
       } else if (isPlayerAttacking) {
+        if (hasAttacked) {
+          return;
+        }
         playAttackAnimation();
+        hasAttacked = true;
         setTimeout(() => {
           lastEvent = now;
           currentEvent++;
@@ -203,8 +210,6 @@ var showDialog = false;
 var dialogCharAt = 1;
 var dialogFx = {};
 
-var damagedSound = {};
-
 var attackFx = {};
 
 var attackPointerPos = 20;
@@ -223,8 +228,14 @@ var onEvent = false;
 var onDialog = false;
 
 var showMissSign = false;
+var KRSign;
+var HPSign;
 
 var currentEvent = 0;
+
+var hasAttacked = false;
+
+var allAudio;
 
 var stringPool =
   " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
@@ -317,15 +328,70 @@ function renderBattleFont(x, y, ctx, str, scale = 2.5) {
   });
 }
 
+function stopAllAudio() {
+  allAudio.forEach((a) => {
+    a.pause();
+  });
+}
+
+function clearTimeouts() {
+  let id = window.setTimeout(function () {}, 0);
+
+  while (id--) {
+    window.clearTimeout(id);
+  }
+}
+
 function initGame() {
+  fps = 60;
+  fpsInterval = 1000 / fps;
+  then = window.performance.now();
+  startTime = then;
+
+  p = {};
+  arena = {};
+  sans = {};
+
   inGame = false;
+
+  gasterList = [];
+  hostileAreas = [];
+  shakeFrames = [];
+  warningAreas = [];
+
+  isPlayerAttacking = false;
+
+  inMenu = false;
+  showDialog = false;
+
+  attackPointerPos = 20;
+  attackPointerVel = 6;
+  attackPointerState = 0;
+
+  isStriking = false;
+  strikeTimestamp = 0;
+  strikeCurrentFrame = 0;
+  strikeScale = 1.5;
+
+  lastEvent = 0;
 
   onEvent = false;
   onDialog = false;
 
+  now = 0;
+
+  allAudio = [...document.getElementsByTagName("audio")];
+
   dpr = Math.ceil(window.devicePixelRatio);
   c = prepCanvas(document.getElementById("canv"), 600, 450);
   ctx = c.getContext("2d");
+
+  hasAttacked = false;
+  showMissSign = false;
+  currentEvent = 0;
+
+  KRSign = document.getElementById("kr-font");
+  HPSign = document.getElementById("hp-font");
 
   bgMusic = document.getElementById("bg-music");
   slamSound = document.getElementById("slam-sound");
@@ -334,7 +400,6 @@ function initGame() {
   dialogFx = document.getElementById("battle-text-sound");
   menuSelectSound = document.getElementById("menu-select-sound");
   attackFx = document.getElementById("player-strike-sound");
-  damagedSound = document.getElementById("damaged-sound");
 
   uiActFrames = [...document.getElementsByClassName("act-ui")];
   uiMercyFrames = [...document.getElementsByClassName("mercy-ui")];
@@ -440,56 +505,59 @@ function renderWarnings(ctx) {
   });
 }
 
-function checkCollideWithHostiles() {
+function checkCollideWithHostiles(now) {
   hostileAreas.forEach((hostiles) => {
-    if (hostiles.isColliding(p)) {
-      let fx = damagedSound.cloneNode(true);
-      fx.volume = 0.2;
-      fx.play();
+    if (hostiles.isColliding(p) && p.isAlive) {
+      p.takeDamage(now);
       return;
     }
   });
 
   gasterList.forEach((gaster) => {
     if (gaster.gasterBlast.length > 0) {
-      if (gaster.gasterBlast[0].isColliding(p)) {
-        let fx = damagedSound.cloneNode(true);
-        fx.volume = 0.2;
-        fx.play();
+      if (gaster.gasterBlast[0].isColliding(p) && p.isAlive) {
+        p.takeDamage(now);
         return;
       }
     }
   });
 }
 
+var fps, fpsInterval, startTime, cFrame, then, elapsed;
+
 function gameLoop(n) {
   now = n;
-  clearFrame();
-  render(now);
-  update(now);
-  checkCollideWithHostiles();
-  destroyHostileObjects(arena);
+  cFrame = window.performance.now();
+  elapsed = cFrame - then;
   requestAnimationFrame(gameLoop);
+
+  if (elapsed > fpsInterval) {
+    then = cFrame - (elapsed % fpsInterval);
+    clearFrame();
+    render(now);
+    if (p.isAlive) {
+      update(now);
+      checkCollideWithHostiles(now);
+    }
+    destroyHostileObjects(arena);
+  }
 }
 
 function update(now) {
-  console.log(!onEvent && now - lastEvent > 2000);
+  // console.log(!onEvent && now - lastEvent > 2000);
   if (!onDialog && !isPlayerAttacking && inGame) {
     if (!onEvent && now - lastEvent > 2000) {
       switch (currentEvent % 2) {
         case 0:
-          console.log("dialog");
           onDialog = true;
           showDialogMenu(lastEvent == 0 ? 1 : undefined);
           break;
         case 1:
-          console.log("attack");
           p.display = true;
           attacks[Math.floor(Math.random() * 5)]();
           currentEvent++;
           break;
         default:
-          console.log(currentEvent % 2);
       }
     }
   }
@@ -498,12 +566,14 @@ function update(now) {
 function render(now) {
   ctx.imageSmoothingEnabled = false;
   if (!inGame) {
-    renderBasicFont(
-      actCanvWidth / 2 - 140,
-      actCanvHeight / 2 - 28,
-      ctx,
-      "PRESS SPACE TO START"
-    );
+    if (Math.floor(now / 1000) % 2 == 0) {
+      renderBasicFont(
+        actCanvWidth / 2 - 140,
+        actCanvHeight / 2 - 28,
+        ctx,
+        "PRESS SPACE TO START"
+      );
+    }
   } else {
     if (shakeFrames.length != 0) {
       ctx.translate(shakeFrames[0][0], shakeFrames[0][1]);
@@ -511,17 +581,18 @@ function render(now) {
 
       if (shakeFrames.length == 0) ctx.restore();
     }
-    console.log(p.x, p.y);
 
-    p.render(ctx, arena);
-    arena.render(ctx);
-    renderWarnings(ctx);
-    renderHostiles(ctx);
-    maskArena();
-    sans.render(ctx);
-    renderMisc(ctx, now);
-    renderGasters(ctx, now);
-    renderDialog(ctx, now);
+    p.render(ctx, arena, now);
+    if (p.isAlive) {
+      arena.render(ctx);
+      renderWarnings(ctx);
+      renderHostiles(ctx);
+      maskArena();
+      sans.render(ctx);
+      renderMisc(ctx, now);
+      renderGasters(ctx, now);
+      renderDialog(ctx, now);
+    }
   }
 }
 
@@ -559,9 +630,29 @@ function renderDialog(ctx, now) {
 function renderMisc(ctx, now) {
   renderBattleFont(17.5, 372, ctx, "poni");
   renderBattleFont(100, 372, ctx, "lv 26");
+  ctx.drawImage(HPSign, 200, 373 + 15 / 2 - HPSign.height / 2);
+  ctx.drawImage(KRSign, 350, 373 + 15 / 2 - KRSign.height / 2);
+
+  let hpBarLength = 110;
+  let curKrBar = hpBarLength * (p.curHp / p.maxHp);
+  let curHpBar = curKrBar - hpBarLength * (p.curKr / p.maxHp);
+
+  ctx.fillStyle = red;
+  ctx.fillRect(230, 372, 110, 16);
+  ctx.fillStyle = purple;
+  ctx.fillRect(230, 372, curKrBar, 16);
+  ctx.fillStyle = yellow;
+  ctx.fillRect(230, 372, curHpBar < 0 ? 0 : curHpBar, 16);
 
   let gap = (560 - uiFightFrames[0].width * 4) / 3;
   let offset = uiFightFrames[0].width + gap;
+
+  renderBattleFont(
+    390,
+    372,
+    ctx,
+    (p.curHp > 9 ? "" : "0") + p.curHp + " / " + p.maxHp
+  );
 
   ctx.drawImage(
     inMenu && activeMenu == 0 ? uiFightFrames[1] : uiFightFrames[0],

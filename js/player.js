@@ -2,12 +2,18 @@ class Player {
   constructor(x, y, color = "#c70021") {
     this.x = x;
     this.y = y;
-    this.texture = document.getElementById("player-heart");
+    this.textureAlive = document.getElementById("player-heart");
+    this.textureSplit = document.getElementById("player-split");
+
+    this.texture = this.textureAlive;
+
+    this.splitSound = document.getElementById("heart-split-sound");
+    this.damagedSound = document.getElementById("damaged-sound");
 
     this.boundingBoxWidth = 14;
     this.boundingBoxHeight = 14;
 
-    this.speed = 2;
+    this.speed = 3;
     // this.velX = 0;
     // this.velY = 0;
     this.velocity = [0, 0, 0, 0];
@@ -27,13 +33,18 @@ class Player {
     this.isJumping = false;
     this.isSlammed = false;
     this.isGrounded = [false, false, false, false];
+    this.isAlive = true;
+    this.canMove = true;
 
     this.display = true;
 
-    this.maxHp = 100;
-    this.curHp = 100;
+    this.maxHp = 92;
+    this.curHp = 92;
     this.curKr = 0;
     this.maxKr = 40;
+
+    this.lastKrDecrease = 0;
+    this.lastHpDecrease = 0;
 
     //0 normal down
     //1 left
@@ -42,10 +53,66 @@ class Player {
     this.orientation = 0;
   }
 
+  takeDamage(now) {
+    if (now - this.lastHpDecrease > 40) {
+      let fx = this.damagedSound.cloneNode(true);
+      fx.volume = 0.3;
+      fx.play();
+
+      if (this.curHp < 2 && this.curKr > 0) {
+        this.curKr--;
+      } else {
+        this.curHp--;
+      }
+
+      this.curKr += 2;
+
+      if (
+        this.curKr > (this.maxKr < this.curHp - 1 ? this.maxKr : this.curHp - 1)
+      ) {
+        this.curKr = this.maxKr < this.curHp - 1 ? this.maxKr : this.curHp - 1;
+      }
+
+      this.lastHpDecrease = now;
+    }
+  }
+
+  die() {
+    stopAllAudio();
+    clearTimeouts();
+    this.curHp = 0;
+    this.isAlive = false;
+    this.canMove = false;
+    this.changeMode(0);
+    this.orientation = 0;
+    this.display = true;
+    this.velocity = [0, 0, 0, 0];
+    setTimeout(() => {
+      this.splitSound.play();
+      this.texture = this.textureSplit;
+      this.isGame = false;
+      setTimeout(() => {
+        initGame();
+      }, 2000);
+    }, 1000);
+  }
+
   changeMode(mode) {
     this.mode = mode;
     this.orientation = 0;
     this.color = this.mode == 0 ? "#c70021" : "#2000bf";
+  }
+
+  update(now) {
+    if (this.curKr > 0 && now - this.lastKrDecrease > 1500) {
+      this.curKr--;
+      this.curHp--;
+      this.lastKrDecrease = now;
+    }
+
+    if (this.curHp < 1 && this.isAlive) {
+      this.die();
+    }
   }
 
   setDefaultPosition() {
@@ -60,7 +127,6 @@ class Player {
     this.velocity = [0, 0, 0, 0];
     this.isJumping = false;
     this.orientation = 0;
-    console.log(this.x, this.y);
   }
 
   move(dirVector) {
@@ -79,19 +145,22 @@ class Player {
     }
   }
 
-  render(ctx, arena) {
+  render(ctx, arena, now) {
+    this.update(now);
+
     if (!this.display) return;
 
     ctx.save();
-    this.x += this.velocity[3] - this.velocity[1];
-    this.y += this.velocity[0] - this.velocity[2];
+
+    if (this.canMove) {
+      this.x += this.velocity[3] - this.velocity[1];
+      this.y += this.velocity[0] - this.velocity[2];
+    }
 
     let leftBorder = arena.x + arena.borderWidth;
     let rightBorder = arena.x + arena.currentWidth - arena.borderWidth;
     let upperBound = arena.y + arena.borderWidth;
     let lowerBound = arena.y + arena.currentHeight - arena.borderWidth;
-
-    console.log({ leftBorder, rightBorder, upperBound, lowerBound });
 
     if (this.x <= leftBorder) {
       this.x = leftBorder;

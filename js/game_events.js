@@ -101,6 +101,7 @@ function showDialogMenu(dialog = -1) {
   attackPointerPos = 20;
   attackPointerVel = 6;
   p.display = false;
+  console.log("tes");
   arena.resizeToLayout(3);
 
   setTimeout(() => {
