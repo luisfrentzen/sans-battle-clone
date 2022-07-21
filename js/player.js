@@ -54,6 +54,7 @@ class Player {
   }
 
   takeDamage(now) {
+    if (!playMode) return;
     if (now - this.lastHpDecrease > 40) {
       let fx = this.damagedSound.cloneNode(true);
       fx.volume = 0.3;

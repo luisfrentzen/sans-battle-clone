@@ -59,7 +59,7 @@ function onKeyUp(e) {
         setTimeout(() => {
           let f2 = fx.cloneNode(true);
           f2.play();
-          intro();
+          if (playMode) intro();
         }, 150);
       }
       break;
@@ -524,27 +524,28 @@ function checkCollideWithHostiles(now) {
 }
 
 var fps, fpsInterval, startTime, cFrame, then, elapsed;
+var playMode = true;
 
 function gameLoop(n) {
   now = n;
   cFrame = window.performance.now();
   elapsed = cFrame - then;
-  requestAnimationFrame(gameLoop);
 
   if (elapsed > fpsInterval) {
     then = cFrame - (elapsed % fpsInterval);
     clearFrame();
     render(now);
     if (p.isAlive) {
-      update(now);
+      if (playMode) update(now);
       checkCollideWithHostiles(now);
     }
     destroyHostileObjects(arena);
   }
+
+  requestAnimationFrame(gameLoop);
 }
 
 function update(now) {
-  // console.log(!onEvent && now - lastEvent > 2000);
   if (!onDialog && !isPlayerAttacking && inGame) {
     if (!onEvent && now - lastEvent > 2000) {
       switch (currentEvent % 2) {
@@ -562,6 +563,16 @@ function update(now) {
     }
   }
 }
+
+var doRenderPlayer = true;
+var doRenderArena = true;
+var doRenderHostiles = true;
+var doRenderMask = true;
+var doRenderSans = true;
+var doRenderGasters = true;
+var doRenderDialog = true;
+var doRenderWarnings = true;
+var doRenderMisc = true;
 
 function render(now) {
   ctx.imageSmoothingEnabled = false;
@@ -582,16 +593,16 @@ function render(now) {
       if (shakeFrames.length == 0) ctx.restore();
     }
 
-    p.render(ctx, arena, now);
+    if (doRenderPlayer) p.render(ctx, arena, now);
     if (p.isAlive) {
-      arena.render(ctx);
-      renderWarnings(ctx);
-      renderHostiles(ctx);
-      maskArena();
-      sans.render(ctx);
-      renderMisc(ctx, now);
-      renderGasters(ctx, now);
-      renderDialog(ctx, now);
+      if (doRenderArena) arena.render(ctx);
+      if (doRenderWarnings) renderWarnings(ctx);
+      if (doRenderHostiles) renderHostiles(ctx);
+      if (doRenderMask) maskArena();
+      if (doRenderSans) sans.render(ctx);
+      if (doRenderMisc) renderMisc(ctx, now);
+      if (doRenderGasters) renderGasters(ctx, now);
+      if (doRenderDialog) renderDialog(ctx, now);
     }
   }
 }
